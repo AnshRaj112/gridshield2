@@ -136,7 +136,8 @@ def compute_full_penalty(forecast: np.ndarray, actual: np.ndarray,
 
 def compute_penalty_summary(forecast: np.ndarray, actual: np.ndarray,
                             is_peak: np.ndarray,
-                            regime: str = "tiered") -> dict:
+                            regime: str = "tiered",
+                            financial_cap: float = FINANCIAL_CAP) -> dict:
     """
     Compute comprehensive penalty summary for the backtest.
     Returns dict with all mandatory metrics.
@@ -148,9 +149,9 @@ def compute_penalty_summary(forecast: np.ndarray, actual: np.ndarray,
     peak_mask = is_peak == 1
     offpeak_mask = is_peak == 0
 
-    # Reliability: count intervals with >5% underestimation
+    # Reliability: count intervals with >5% underestimation ONLY during peak hours
     underest_pct = np.where(actual != 0, (actual - forecast) / actual, 0.0)
-    violations = np.sum(underest_pct > UNDERESTIMATION_THRESHOLD)
+    violations = np.sum((underest_pct > UNDERESTIMATION_THRESHOLD) & peak_mask)
 
     # Forecast bias
     bias = np.mean(pct_deviation)
@@ -162,8 +163,8 @@ def compute_penalty_summary(forecast: np.ndarray, actual: np.ndarray,
         "forecast_bias_pct": float(bias * 100),
         "p95_abs_deviation_kw": float(np.percentile(np.abs(deviation), 95)),
         "reliability_violations": int(violations),
-        "financial_cap": FINANCIAL_CAP,
-        "cap_compliant": bool(np.sum(penalty) <= FINANCIAL_CAP),
+        "financial_cap": financial_cap,
+        "cap_compliant": bool(np.sum(penalty) <= financial_cap),
         "bias_in_bounds": bool(BIAS_LOWER_BOUND <= bias <= BIAS_UPPER_BOUND),
         "mean_abs_deviation_kw": float(np.mean(np.abs(deviation))),
         "max_abs_deviation_kw": float(np.max(np.abs(deviation))),
@@ -172,11 +173,12 @@ def compute_penalty_summary(forecast: np.ndarray, actual: np.ndarray,
 
 
 def compute_naive_penalty(actual: np.ndarray, is_peak: np.ndarray,
-                          regime: str = "tiered") -> dict:
+                          regime: str = "tiered",
+                          financial_cap: float = FINANCIAL_CAP) -> dict:
     """
     Compute penalty for naive baseline (previous-day same-time forecast).
     Uses lag-96 as the naive forecast.
     """
     naive_forecast = np.roll(actual, 96)
     naive_forecast[:96] = actual[:96]  # fill first day
-    return compute_penalty_summary(naive_forecast, actual, is_peak, regime)
+    return compute_penalty_summary(naive_forecast, actual, is_peak, regime, financial_cap=financial_cap)

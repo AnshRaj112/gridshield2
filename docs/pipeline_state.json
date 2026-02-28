@@ -1,83 +1,89 @@
 {
   "model_metrics": {
     "t+1": {
-      "mae": 4.82614513952105,
-      "rmse": 9.407430298250855,
-      "mape": 0.4587619122093218,
-      "bias_pct": 0.16375934192718733,
+      "financial_penalty": 461896.0786656429,
+      "reliability_violations": 1,
+      "bias_pct": 0.18102344198287076,
+      "mape": 0.4523850730516662,
       "n_train": 240881,
       "n_val": 42509,
-      "n_features": 79
+      "n_features": 79,
+      "peak_buffer": 0.5382097982229368
     },
     "t+96": {
-      "mae": 66.25164320206457,
-      "rmse": 94.32917258738696,
-      "mape": 6.199768984615924,
-      "bias_pct": 5.2425438067978645,
+      "financial_penalty": 28464179.066484105,
+      "reliability_violations": 133,
+      "bias_pct": 5.44308315470345,
+      "mape": 6.463395611017013,
       "n_train": 240800,
       "n_val": 42495,
-      "n_features": 63
+      "n_features": 63,
+      "peak_buffer": -15.67820968464028
     },
     "t+288": {
-      "mae": 140.02009915090238,
-      "rmse": 184.9146071498782,
-      "mape": 13.00614944644986,
-      "bias_pct": 12.27676860135665,
+      "financial_penalty": 61231999.287971176,
+      "reliability_violations": 465,
+      "bias_pct": 10.861647476659444,
+      "mape": 12.022012890961587,
       "n_train": 240637,
       "n_val": 42466,
-      "n_features": 61
+      "n_features": 61,
+      "peak_buffer": -63.14806319154519
     }
   },
   "backtest_tiered": {
-    "total_penalty": 93806.71529760378,
-    "peak_penalty": 14981.41871169387,
-    "offpeak_penalty": 78825.2965859099,
-    "forecast_bias_pct": 0.16729267239843926,
-    "p95_abs_deviation_kw": 32.20456020821834,
+    "total_penalty": 92744.03270892266,
+    "peak_penalty": 18332.388859438168,
+    "offpeak_penalty": 74411.6438494845,
+    "forecast_bias_pct": 0.2066516587095982,
+    "p95_abs_deviation_kw": 32.19779445027547,
     "reliability_violations": 0,
     "financial_cap": 50000.0,
     "cap_compliant": false,
     "bias_in_bounds": true,
-    "mean_abs_deviation_kw": 13.58030409868135,
-    "max_abs_deviation_kw": 50.55006987515435,
-    "mape_pct": 1.0697834956330174
+    "mean_abs_deviation_kw": 13.711839991969304,
+    "max_abs_deviation_kw": 49.15793320054286,
+    "mape_pct": 1.0767553577818607
   },
   "backtest_stage2": {
-    "total_penalty": 116463.71479834086,
-    "peak_penalty": 13001.208063167192,
-    "offpeak_penalty": 103462.50673517368,
-    "forecast_bias_pct": 0.16729267239843926,
-    "p95_abs_deviation_kw": 32.20456020821834,
+    "total_penalty": 115941.10110801051,
+    "peak_penalty": 14902.701149091943,
+    "offpeak_penalty": 101038.39995891857,
+    "forecast_bias_pct": 0.2066516587095982,
+    "p95_abs_deviation_kw": 32.19779445027547,
     "reliability_violations": 0,
     "financial_cap": 50000.0,
     "cap_compliant": false,
     "bias_in_bounds": true,
-    "mean_abs_deviation_kw": 13.58030409868135,
-    "max_abs_deviation_kw": 50.55006987515435,
-    "mape_pct": 1.0697834956330174
+    "mean_abs_deviation_kw": 13.711839991969304,
+    "max_abs_deviation_kw": 49.15793320054286,
+    "mape_pct": 1.0767553577818607
   },
   "optimizer": {
-    "bias_offset": -0.0025125628140703488,
-    "total_penalty": 88443.48011487587
+    "peak_buffer": -0.005172413793103445,
+    "offpeak_buffer": -0.0024137931034482717,
+    "total_penalty": 85610.4177141608
   },
   "mc_summary": {
-    "mean_penalty": 531962.0907741439,
-    "std_penalty": 13715.391976408468,
-    "median_penalty": 531878.5586815565,
-    "var_95": 554787.7924534662,
-    "var_99": 564504.451095458,
-    "cvar_95": 560330.8173835964,
-    "max_penalty": 578603.6354550906,
-    "min_penalty": 488888.9151380872,
+    "mean_penalty": 528957.106350538,
+    "std_penalty": 13590.602632066966,
+    "median_penalty": 529438.2349043208,
+    "var_95": 552032.6713399728,
+    "var_99": 562274.5981516454,
+    "cvar_95": 557213.9169013512,
+    "var_95_cap_utilization_pct": 1104.0653426799456,
+    "cvar_95_cap_utilization_pct": 1114.4278338027023,
+    "max_penalty": 571275.6858182526,
+    "min_penalty": 487134.05416995194,
     "cap_breach_prob": 1.0,
-    "mean_violations": 172.029,
-    "mean_bias_pct": 0.007609716887583267,
+    "mean_violations": 16.606,
+    "mean_bias_pct": 0.01034003275155747,
     "percentiles": {
-      "p5": 510057.1887337876,
-      "p25": 522371.83151199284,
-      "p50": 531878.5586815565,
-      "p75": 541657.6851508571,
-      "p95": 554787.7924534662
+      "p5": 506918.0367293666,
+      "p25": 519613.6138300855,
+      "p50": 529438.2349043208,
+      "p75": 538374.2911610848,
+      "p95": 552032.6713399728
     }
   },
   "scenario_results": [
@@ -86,72 +92,72 @@
       "penalty_rate_multiplier": 1.0,
       "cyclone_impact_pct": 0.15,
       "heatwave_impact_pct": 0.0,
-      "total_penalty": 1589218.181636455,
-      "peak_penalty": 335175.88571292267,
-      "offpeak_penalty": 1254042.2959235322,
-      "forecast_bias_pct": -2.7461786392234853,
-      "p95_abs_deviation_kw": 214.3146527845098,
-      "reliability_violations": 608,
+      "total_penalty": 1589752.3824836258,
+      "peak_penalty": 337385.8293960367,
+      "offpeak_penalty": 1252366.5530875893,
+      "forecast_bias_pct": -2.7429437465428403,
+      "p95_abs_deviation_kw": 212.75529678986018,
+      "reliability_violations": 100,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": false,
-      "mean_abs_deviation_kw": 50.21068102949816,
-      "max_abs_deviation_kw": 266.82236100442674,
-      "mape_pct": 3.5214236897642395
+      "mean_abs_deviation_kw": 50.117088403425726,
+      "max_abs_deviation_kw": 262.8744870066903,
+      "mape_pct": 3.5113368096314392
     },
     {
       "scenario_name": "Heatwave",
       "penalty_rate_multiplier": 1.0,
       "cyclone_impact_pct": 0.0,
       "heatwave_impact_pct": 0.1,
-      "total_penalty": 1110091.962060672,
-      "peak_penalty": 1033950.9777646438,
-      "offpeak_penalty": 76140.98429602827,
-      "forecast_bias_pct": -1.60748232001725,
-      "p95_abs_deviation_kw": 127.83797153671112,
+      "total_penalty": 1113611.2568378025,
+      "peak_penalty": 1040182.1908891932,
+      "offpeak_penalty": 73429.06594860906,
+      "forecast_bias_pct": -1.6037001256771206,
+      "p95_abs_deviation_kw": 128.80654586233723,
       "reliability_violations": 496,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": true,
-      "mean_abs_deviation_kw": 31.752076880211828,
-      "max_abs_deviation_kw": 150.75561245707217,
-      "mape_pct": 2.3675185877030116
+      "mean_abs_deviation_kw": 31.640553176697527,
+      "max_abs_deviation_kw": 154.60343317353613,
+      "mape_pct": 2.3535565282352366
     },
     {
       "scenario_name": "Penalty Hike \u00d71.5",
       "penalty_rate_multiplier": 1.5,
       "cyclone_impact_pct": 0.0,
       "heatwave_impact_pct": 0.0,
-      "total_penalty": 132665.2201723138,
-      "peak_penalty": 18453.743728271424,
-      "offpeak_penalty": 114211.4764440424,
-      "forecast_bias_pct": -0.08438394235632615,
-      "p95_abs_deviation_kw": 32.177250379664784,
+      "total_penalty": 128415.62657124118,
+      "peak_penalty": 18272.02764832759,
+      "offpeak_penalty": 110143.59892291359,
+      "forecast_bias_pct": -0.08165286425259065,
+      "p95_abs_deviation_kw": 31.177505808863952,
       "reliability_violations": 0,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": true,
-      "mean_abs_deviation_kw": 13.572670434221804,
-      "max_abs_deviation_kw": 47.446995649337396,
-      "mape_pct": 1.0683515994352453
+      "mean_abs_deviation_kw": 13.364078496994635,
+      "max_abs_deviation_kw": 45.963615444541574,
+      "mape_pct": 1.048375125434003
     },
     {
       "scenario_name": "Extreme: Cyclone + Penalty Hike",
       "penalty_rate_multiplier": 1.5,
       "cyclone_impact_pct": 0.15,
       "heatwave_impact_pct": 0.0,
-      "total_penalty": 2383827.2724546827,
-      "peak_penalty": 502763.828569384,
-      "offpeak_penalty": 1881063.4438852984,
-      "forecast_bias_pct": -2.7461786392234853,
-      "p95_abs_deviation_kw": 214.3146527845098,
-      "reliability_violations": 608,
+      "total_penalty": 2384628.5737254387,
+      "peak_penalty": 506078.74409405503,
+      "offpeak_penalty": 1878549.829631384,
+      "forecast_bias_pct": -2.7429437465428403,
+      "p95_abs_deviation_kw": 212.75529678986018,
+      "reliability_violations": 100,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": false,
-      "mean_abs_deviation_kw": 50.21068102949816,
-      "max_abs_deviation_kw": 266.82236100442674,
-      "mape_pct": 3.5214236897642395
+      "mean_abs_deviation_kw": 50.117088403425726,
+      "max_abs_deviation_kw": 262.8744870066903,
+      "mape_pct": 3.5113368096314392
     }
   ],
   "strategy": {
@@ -164,16 +170,18 @@
     },
     "bias_positioning": {
       "allowed_range": "[-2%, 3%]",
-      "optimal_bias_pct": -0.08438394235632615,
+      "optimal_bias_pct": -0.08165286425259065,
       "rationale": "Under asymmetric penalties where Pu > Po, the optimal strategy biases forecast slightly upward (overforecast) to reduce the more expensive underforecast penalties. The optimizer found the minimum-penalty bias within the regulatory bounds."
     },
     "financial_exposure": {
-      "expected_penalty": 531962.0907741439,
-      "var_95": 554787.7924534662,
-      "cvar_95": 560330.8173835964,
+      "expected_penalty": 528957.106350538,
+      "var_95": 552032.6713399728,
+      "cvar_95": 557213.9169013512,
       "cap_breach_probability": 1.0,
       "financial_cap": 50000.0,
-      "headroom": -504787.7924534662
+      "headroom": -502032.67133997276,
+      "minimum_required_cap": 89166.34926657694,
+      "is_feasible": false
     },
     "constraint_satisfaction": {
       "financial_cap_met": false,
@@ -181,710 +189,767 @@
       "bias_met": true
     },
     "penalty_reduction": {
-      "vs_naive_pct": 93.82566715814662,
-      "vs_rolling_pct": 97.32184488573908
+      "vs_naive_pct": 93.8956126411213,
+      "vs_rolling_pct": 97.35218417222495
     }
   },
   "pareto_points": [
     {
       "bias_offset": -0.03,
-      "total_penalty": 520608.28410258086,
-      "reliability_violations": 68,
-      "forecast_bias_pct": -2.8377261077735167,
-      "mape_pct": 2.8528479804158535
+      "total_penalty": 511046.5461606332,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.7995478910516924,
+      "mape_pct": 2.8125962455903806
     },
     {
       "bias_offset": -0.028686868686868684,
-      "total_penalty": 484549.60240641254,
-      "reliability_violations": 37,
-      "forecast_bias_pct": -2.7061932992137954,
-      "mape_pct": 2.728203854604241
+      "total_penalty": 474895.11273389834,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.6679633989745923,
+      "mape_pct": 2.687026946716889
     },
     {
       "bias_offset": -0.027373737373737373,
-      "total_penalty": 449130.932565995,
-      "reliability_violations": 21,
-      "forecast_bias_pct": -2.5746604906540846,
-      "mape_pct": 2.605592824635692
+      "total_penalty": 437651.00932171766,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.536378906897504,
+      "mape_pct": 2.5634847022979046
     },
     {
       "bias_offset": -0.02606060606060606,
-      "total_penalty": 414025.7579004087,
-      "reliability_violations": 8,
-      "forecast_bias_pct": -2.4431276820943633,
-      "mape_pct": 2.4845866662791205
+      "total_penalty": 404313.2973040184,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.4047944148204037,
+      "mape_pct": 2.441750120878909
     },
     {
       "bias_offset": -0.024747474747474747,
-      "total_penalty": 379496.139907886,
-      "reliability_violations": 4,
-      "forecast_bias_pct": -2.3115948735346525,
-      "mape_pct": 2.3652604616819675
+      "total_penalty": 370141.5026169638,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.273209922743315,
+      "mape_pct": 2.321941234085105
     },
     {
       "bias_offset": -0.023434343434343433,
-      "total_penalty": 346861.73363106744,
-      "reliability_violations": 1,
-      "forecast_bias_pct": -2.180062064974942,
-      "mape_pct": 2.2479211324668587
+      "total_penalty": 338085.21880582196,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.1416254306662266,
+      "mape_pct": 2.2043719750910196
     },
     {
       "bias_offset": -0.022121212121212118,
-      "total_penalty": 315234.09447273926,
+      "total_penalty": 306783.7039595634,
       "reliability_violations": 0,
-      "forecast_bias_pct": -2.0485292564152204,
-      "mape_pct": 2.132909749662885
+      "forecast_bias_pct": -2.010040938589127,
+      "mape_pct": 2.0897796072744286
     },
     {
       "bias_offset": -0.020808080808080807,
-      "total_penalty": 281925.2675697069,
+      "total_penalty": 274467.265144677,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.9169964478555104,
-      "mape_pct": 2.0208966806444755
+      "forecast_bias_pct": -1.878456446512038,
+      "mape_pct": 1.9777001565762946
     },
     {
       "bias_offset": -0.019494949494949496,
-      "total_penalty": 255466.2079802989,
+      "total_penalty": 246429.28406986938,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.7854636392957888,
-      "mape_pct": 1.9113594077109295
+      "forecast_bias_pct": -1.7468719544349385,
+      "mape_pct": 1.8683863306643542
     },
     {
       "bias_offset": -0.01818181818181818,
-      "total_penalty": 230313.5552673062,
+      "total_penalty": 219767.36102021212,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.6539308307360783,
-      "mape_pct": 1.8047370440047756
+      "forecast_bias_pct": -1.6152874623578495,
+      "mape_pct": 1.762457703855586
     },
     {
       "bias_offset": -0.016868686868686866,
-      "total_penalty": 207638.1820429315,
+      "total_penalty": 197977.77968200724,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.522398022176368,
-      "mape_pct": 1.7023390684262605
+      "forecast_bias_pct": -1.483702970280761,
+      "mape_pct": 1.6611759429237902
     },
     {
       "bias_offset": -0.015555555555555555,
-      "total_penalty": 187277.75539228565,
+      "total_penalty": 177487.29187685216,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.3908652136166464,
-      "mape_pct": 1.605381894132506
+      "forecast_bias_pct": -1.352118478203661,
+      "mape_pct": 1.5658603773954565
     },
     {
       "bias_offset": -0.01424242424242424,
-      "total_penalty": 167597.51203855604,
+      "total_penalty": 159164.91246157928,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.259332405056936,
-      "mape_pct": 1.513868833029597
+      "forecast_bias_pct": -1.2205339861265723,
+      "mape_pct": 1.4767664626638168
     },
     {
       "bias_offset": -0.01292929292929293,
-      "total_penalty": 148424.59247501736,
+      "total_penalty": 141894.87373815614,
       "reliability_violations": 0,
-      "forecast_bias_pct": -1.1277995964972147,
-      "mape_pct": 1.4289251897635438
+      "forecast_bias_pct": -1.0889494940494726,
+      "mape_pct": 1.3947304850900837
     },
     {
       "bias_offset": -0.011616161616161615,
-      "total_penalty": 130390.1061695307,
+      "total_penalty": 124369.82201865174,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.9962667879375043,
-      "mape_pct": 1.3523544793402598
+      "forecast_bias_pct": -0.9573650019723838,
+      "mape_pct": 1.3206561639069985
     },
     {
       "bias_offset": -0.010303030303030303,
-      "total_penalty": 116751.47592047832,
+      "total_penalty": 110724.83816848081,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.8647339793777827,
-      "mape_pct": 1.2845076655886971
+      "forecast_bias_pct": -0.8257805098952841,
+      "mape_pct": 1.2564031038015653
     },
     {
       "bias_offset": -0.008989898989898989,
-      "total_penalty": 106412.21244379468,
+      "total_penalty": 102065.27662044216,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.7332011708180722,
-      "mape_pct": 1.2255445754022816
+      "forecast_bias_pct": -0.6941960178181955,
+      "mape_pct": 1.2012849831712877
     },
     {
       "bias_offset": -0.007676767676767674,
-      "total_penalty": 98107.09471564568,
+      "total_penalty": 95079.84172255671,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.601668362258362,
-      "mape_pct": 1.1755965527234562
+      "forecast_bias_pct": -0.5626115257411066,
+      "mape_pct": 1.157066579973885
     },
     {
       "bias_offset": -0.006363636363636363,
-      "total_penalty": 92614.9712752426,
+      "total_penalty": 90895.36200908691,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.4701355536986404,
-      "mape_pct": 1.1351072045869903
+      "forecast_bias_pct": -0.4310270336640071,
+      "mape_pct": 1.12302129367504
     },
     {
       "bias_offset": -0.005050505050505048,
-      "total_penalty": 89463.73732174172,
+      "total_penalty": 87977.20091820048,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.33860274513892985,
-      "mape_pct": 1.1031675811074253
+      "forecast_bias_pct": -0.2994425415869181,
+      "mape_pct": 1.0976340975193823
     },
     {
       "bias_offset": -0.003737373737373737,
-      "total_penalty": 88583.03752836183,
+      "total_penalty": 87485.71206028681,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.20706993657920802,
-      "mape_pct": 1.080491856230394
+      "forecast_bias_pct": -0.16785804950981853,
+      "mape_pct": 1.0805596614977335
     },
     {
       "bias_offset": -0.0024242424242424225,
-      "total_penalty": 88682.33507607273,
+      "total_penalty": 88469.88667020164,
       "reliability_violations": 0,
-      "forecast_bias_pct": -0.07553712801949802,
-      "mape_pct": 1.0678280054769003
+      "forecast_bias_pct": -0.036273557432729725,
+      "mape_pct": 1.0712255818008083
     },
     {
       "bias_offset": -0.0011111111111111113,
-      "total_penalty": 90910.89934080615,
+      "total_penalty": 90233.45608239961,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.055995680540223566,
-      "mape_pct": 1.065087211954359
+      "forecast_bias_pct": 0.09531093464437003,
+      "mape_pct": 1.0705646990575186
     },
     {
       "bias_offset": 0.00020202020202020332,
-      "total_penalty": 94536.56136810679,
+      "total_penalty": 93499.79711486463,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.18752848909994524,
-      "mape_pct": 1.0713278809540066
+      "forecast_bias_pct": 0.22689542672146992,
+      "mape_pct": 1.078462579057711
     },
     {
       "bias_offset": 0.001515151515151518,
-      "total_penalty": 98640.27804182809,
+      "total_penalty": 97965.07262602675,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.3190612976596445,
-      "mape_pct": 1.0859900074440554
+      "forecast_bias_pct": 0.35847991879854757,
+      "mape_pct": 1.09472026681027
     },
     {
       "bias_offset": 0.0028282828282828326,
-      "total_penalty": 103634.09590217186,
+      "total_penalty": 103780.4092433934,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.450594106219366,
-      "mape_pct": 1.1094571298045321
+      "forecast_bias_pct": 0.49006441087564745,
+      "mape_pct": 1.1206775144966077
     },
     {
       "bias_offset": 0.00414141414141414,
-      "total_penalty": 109200.7632789601,
+      "total_penalty": 109613.03037589513,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.5821269147790875,
-      "mape_pct": 1.1417911039192477
+      "forecast_bias_pct": 0.621648902952747,
+      "mape_pct": 1.1557766779395109
     },
     {
       "bias_offset": 0.005454545454545455,
-      "total_penalty": 116600.68598468041,
+      "total_penalty": 117709.53734949607,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.7136597233387868,
-      "mape_pct": 1.1832182283871804
+      "forecast_bias_pct": 0.7532333950298247,
+      "mape_pct": 1.1998604049941468
     },
     {
       "bias_offset": 0.00676767676767677,
-      "total_penalty": 125102.3693951099,
+      "total_penalty": 127619.25174668674,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.8451925318985082,
-      "mape_pct": 1.2348703221635484
+      "forecast_bias_pct": 0.8848178871069247,
+      "mape_pct": 1.252851366548954
     },
     {
       "bias_offset": 0.008080808080808084,
-      "total_penalty": 135936.98307163364,
+      "total_penalty": 136991.24892866975,
       "reliability_violations": 0,
-      "forecast_bias_pct": 0.9767253404582298,
-      "mape_pct": 1.2954673544711948
+      "forecast_bias_pct": 1.0164023791840242,
+      "mape_pct": 1.3142069355450454
     },
     {
       "bias_offset": 0.009393939393939392,
-      "total_penalty": 146510.47548645103,
+      "total_penalty": 148784.05864671196,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.1082581490179289,
-      "mape_pct": 1.3653565759042305
+      "forecast_bias_pct": 1.1479868712611019,
+      "mape_pct": 1.3855041595220312
     },
     {
       "bias_offset": 0.010707070707070707,
-      "total_penalty": 158576.85503576594,
+      "total_penalty": 162330.27683632958,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.2397909575776507,
-      "mape_pct": 1.4448113239672098
+      "forecast_bias_pct": 1.279571363338202,
+      "mape_pct": 1.4664253318186824
     },
     {
       "bias_offset": 0.012020202020202021,
-      "total_penalty": 174757.17226336803,
+      "total_penalty": 178413.6425938635,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.3713237661373718,
-      "mape_pct": 1.5317660485546023
+      "forecast_bias_pct": 1.4111558554153014,
+      "mape_pct": 1.5553596740300044
     },
     {
       "bias_offset": 0.013333333333333336,
-      "total_penalty": 193696.35131326487,
+      "total_penalty": 199110.8398478126,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.5028565746970934,
-      "mape_pct": 1.6249227914954274
+      "forecast_bias_pct": 1.5427403474924015,
+      "mape_pct": 1.6520045034110518
     },
     {
       "bias_offset": 0.01464646464646465,
-      "total_penalty": 211875.5587812684,
+      "total_penalty": 219716.4432279999,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.6343893832567926,
-      "mape_pct": 1.724352447841398
+      "forecast_bias_pct": 1.6743248395694792,
+      "mape_pct": 1.7544316077259245
     },
     {
       "bias_offset": 0.01595959595959596,
-      "total_penalty": 234614.09059605197,
+      "total_penalty": 243013.54740292733,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.7659221918165144,
-      "mape_pct": 1.8295213568466684
+      "forecast_bias_pct": 1.8059093316465789,
+      "mape_pct": 1.8621840635786895
     },
     {
       "bias_offset": 0.017272727272727273,
-      "total_penalty": 260591.41607436424,
+      "total_penalty": 268935.79469720495,
       "reliability_violations": 0,
-      "forecast_bias_pct": 1.8974550003762363,
-      "mape_pct": 1.939735422769251
+      "forecast_bias_pct": 1.9374938237236787,
+      "mape_pct": 1.974387667810182
     },
     {
       "bias_offset": 0.018585858585858588,
-      "total_penalty": 289000.6564275618,
+      "total_penalty": 299290.49846902594,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.028987808935935,
-      "mape_pct": 2.055800824627136
+      "forecast_bias_pct": 2.0690783158007564,
+      "mape_pct": 2.0914919412986115
     },
     {
       "bias_offset": 0.019898989898989902,
-      "total_penalty": 316470.6183263058,
+      "total_penalty": 327501.06113092427,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.160520617495657,
-      "mape_pct": 2.1765188919533647
+      "forecast_bias_pct": 2.2006628078778556,
+      "mape_pct": 2.2138117008784337
     },
     {
       "bias_offset": 0.02121212121212121,
-      "total_penalty": 347273.91413294314,
+      "total_penalty": 361761.46689512813,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.292053426055378,
-      "mape_pct": 2.301015978331854
+      "forecast_bias_pct": 2.332247299954956,
+      "mape_pct": 2.3397744680256816
     },
     {
       "bias_offset": 0.022525252525252525,
-      "total_penalty": 378857.92796331795,
+      "total_penalty": 395402.9427771318,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.4235862346151005,
-      "mape_pct": 2.428063814737648
+      "forecast_bias_pct": 2.4638317920320554,
+      "mape_pct": 2.4674742745336458
     },
     {
       "bias_offset": 0.02383838383838384,
-      "total_penalty": 409678.6790281696,
+      "total_penalty": 427342.43542339886,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.555119043174799,
-      "mape_pct": 2.5570618109709247
+      "forecast_bias_pct": 2.5954162841091333,
+      "mape_pct": 2.5969521682524848
     },
     {
       "bias_offset": 0.025151515151515154,
-      "total_penalty": 442609.3533622386,
+      "total_penalty": 460137.108967156,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.6866518517345206,
-      "mape_pct": 2.6874345521159113
+      "forecast_bias_pct": 2.7270007761862334,
+      "mape_pct": 2.7274165113383524
     },
     {
       "bias_offset": 0.02646464646464647,
-      "total_penalty": 478601.9345471215,
+      "total_penalty": 490820.07445318403,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.818184660294242,
-      "mape_pct": 2.818444180616498
+      "forecast_bias_pct": 2.8585852682633326,
+      "mape_pct": 2.858639446458535
     },
     {
       "bias_offset": 0.027777777777777776,
-      "total_penalty": 515657.4614223979,
+      "total_penalty": 525564.6330570458,
       "reliability_violations": 0,
-      "forecast_bias_pct": 2.949717468853941,
-      "mape_pct": 2.949805436873388
+      "forecast_bias_pct": 2.9901697603404105,
+      "mape_pct": 2.9901697603404105
     },
     {
       "bias_offset": 0.02909090909090909,
-      "total_penalty": 550545.0407414795,
+      "total_penalty": 560591.564827774,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.081250277413663,
-      "mape_pct": 3.0812525236777133
+      "forecast_bias_pct": 3.12175425241751,
+      "mape_pct": 3.12175425241751
     },
     {
       "bias_offset": 0.030404040404040406,
-      "total_penalty": 587267.840046841,
+      "total_penalty": 594667.147510418,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.2127830859733844,
-      "mape_pct": 3.2127830859733844
+      "forecast_bias_pct": 3.25333874449461,
+      "mape_pct": 3.25333874449461
     },
     {
       "bias_offset": 0.03171717171717172,
-      "total_penalty": 625467.4929396277,
+      "total_penalty": 634996.9066825318,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.3443158945331057,
-      "mape_pct": 3.3443158945331057
+      "forecast_bias_pct": 3.3849232365717095,
+      "mape_pct": 3.3849232365717095
     },
     {
       "bias_offset": 0.033030303030303035,
-      "total_penalty": 665348.8119498878,
+      "total_penalty": 676375.8667576816,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.475848703092806,
-      "mape_pct": 3.475848703092806
+      "forecast_bias_pct": 3.516507728648788,
+      "mape_pct": 3.516507728648788
     },
     {
       "bias_offset": 0.03434343434343434,
-      "total_penalty": 709230.4395116594,
+      "total_penalty": 717440.5233652943,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.607381511652527,
-      "mape_pct": 3.607381511652527
+      "forecast_bias_pct": 3.648092220725887,
+      "mape_pct": 3.648092220725887
     },
     {
       "bias_offset": 0.035656565656565664,
-      "total_penalty": 755411.8990368416,
+      "total_penalty": 763364.8518141315,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.7389143202122486,
-      "mape_pct": 3.7389143202122486
+      "forecast_bias_pct": 3.7796767128029876,
+      "mape_pct": 3.7796767128029876
     },
     {
       "bias_offset": 0.03696969696969697,
-      "total_penalty": 799688.3507878609,
+      "total_penalty": 809314.7650497863,
       "reliability_violations": 0,
-      "forecast_bias_pct": 3.8704471287719477,
-      "mape_pct": 3.8704471287719477
+      "forecast_bias_pct": 3.911261204880065,
+      "mape_pct": 3.911261204880065
     },
     {
       "bias_offset": 0.03828282828282828,
-      "total_penalty": 847082.3487632617,
+      "total_penalty": 854785.107181268,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.00197993733167,
-      "mape_pct": 4.00197993733167
+      "forecast_bias_pct": 4.042845696957165,
+      "mape_pct": 4.042845696957165
     },
     {
       "bias_offset": 0.0395959595959596,
-      "total_penalty": 902935.7094937293,
+      "total_penalty": 908080.9747558862,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.133512745891391,
-      "mape_pct": 4.133512745891391
+      "forecast_bias_pct": 4.174430189034265,
+      "mape_pct": 4.174430189034265
     },
     {
       "bias_offset": 0.04090909090909091,
-      "total_penalty": 950445.8869851688,
+      "total_penalty": 957905.0382901609,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.265045554451112,
-      "mape_pct": 4.265045554451112
+      "forecast_bias_pct": 4.306014681111364,
+      "mape_pct": 4.306014681111364
     },
     {
       "bias_offset": 0.04222222222222222,
-      "total_penalty": 999434.0052842296,
+      "total_penalty": 1010335.8378369751,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.3965783630108115,
-      "mape_pct": 4.3965783630108115
+      "forecast_bias_pct": 4.437599173188443,
+      "mape_pct": 4.437599173188443
     },
     {
       "bias_offset": 0.04353535353535354,
-      "total_penalty": 1044181.7803351197,
+      "total_penalty": 1059846.7144193817,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.528111171570534,
-      "mape_pct": 4.528111171570534
+      "forecast_bias_pct": 4.569183665265541,
+      "mape_pct": 4.569183665265541
     },
     {
       "bias_offset": 0.044848484848484846,
-      "total_penalty": 1095445.4866708918,
+      "total_penalty": 1112022.3311754277,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.659643980130255,
-      "mape_pct": 4.659643980130255
+      "forecast_bias_pct": 4.700768157342641,
+      "mape_pct": 4.700768157342641
     },
     {
       "bias_offset": 0.04616161616161617,
-      "total_penalty": 1150066.2878929083,
+      "total_penalty": 1168178.312256054,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.7911767886899534,
-      "mape_pct": 4.7911767886899534
+      "forecast_bias_pct": 4.83235264941972,
+      "mape_pct": 4.83235264941972
     },
     {
       "bias_offset": 0.047474747474747475,
-      "total_penalty": 1202580.8775572497,
+      "total_penalty": 1216056.6436248159,
       "reliability_violations": 0,
-      "forecast_bias_pct": 4.922709597249675,
-      "mape_pct": 4.922709597249675
+      "forecast_bias_pct": 4.963937141496818,
+      "mape_pct": 4.963937141496818
     },
     {
       "bias_offset": 0.04878787878787878,
-      "total_penalty": 1259689.274576961,
+      "total_penalty": 1272599.8021741835,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.054242405809396,
-      "mape_pct": 5.054242405809396
+      "forecast_bias_pct": 5.095521633573918,
+      "mape_pct": 5.095521633573918
     },
     {
       "bias_offset": 0.050101010101010104,
-      "total_penalty": 1311944.1685585924,
+      "total_penalty": 1333036.2024640352,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.185775214369119,
-      "mape_pct": 5.185775214369119
+      "forecast_bias_pct": 5.2271061256510185,
+      "mape_pct": 5.2271061256510185
     },
     {
       "bias_offset": 0.05141414141414141,
-      "total_penalty": 1379222.4130059588,
+      "total_penalty": 1400214.9711246395,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.3173080229288185,
-      "mape_pct": 5.3173080229288185
+      "forecast_bias_pct": 5.358690617728096,
+      "mape_pct": 5.358690617728096
     },
     {
       "bias_offset": 0.052727272727272734,
-      "total_penalty": 1449797.5350593617,
+      "total_penalty": 1472946.8027454345,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.448840831488539,
-      "mape_pct": 5.448840831488539
+      "forecast_bias_pct": 5.490275109805196,
+      "mape_pct": 5.490275109805196
     },
     {
       "bias_offset": 0.05404040404040404,
-      "total_penalty": 1514389.8712636135,
+      "total_penalty": 1543379.0955222968,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.580373640048262,
-      "mape_pct": 5.580373640048262
+      "forecast_bias_pct": 5.621859601882296,
+      "mape_pct": 5.621859601882296
     },
     {
       "bias_offset": 0.05535353535353535,
-      "total_penalty": 1589047.3075385266,
+      "total_penalty": 1619007.8575416508,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.7119064486079605,
-      "mape_pct": 5.7119064486079605
+      "forecast_bias_pct": 5.753444093959374,
+      "mape_pct": 5.753444093959374
     },
     {
       "bias_offset": 0.05666666666666667,
-      "total_penalty": 1673486.1540326546,
+      "total_penalty": 1703372.1457366147,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.843439257167682,
-      "mape_pct": 5.843439257167682
+      "forecast_bias_pct": 5.885028586036473,
+      "mape_pct": 5.885028586036473
     },
     {
       "bias_offset": 0.05797979797979798,
-      "total_penalty": 1763867.9166081604,
+      "total_penalty": 1793551.6236178314,
       "reliability_violations": 0,
-      "forecast_bias_pct": 5.974972065727403,
-      "mape_pct": 5.974972065727403
+      "forecast_bias_pct": 6.016613078113573,
+      "mape_pct": 6.016613078113573
     },
     {
       "bias_offset": 0.0592929292929293,
-      "total_penalty": 1845899.5795711293,
+      "total_penalty": 1879091.40583585,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.106504874287125,
-      "mape_pct": 6.106504874287125
+      "forecast_bias_pct": 6.148197570190672,
+      "mape_pct": 6.148197570190672
     },
     {
       "bias_offset": 0.06060606060606061,
-      "total_penalty": 1938531.7433650522,
+      "total_penalty": 1978498.0286615237,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.238037682846823,
-      "mape_pct": 6.238037682846823
+      "forecast_bias_pct": 6.27978206226775,
+      "mape_pct": 6.27978206226775
     },
     {
       "bias_offset": 0.061919191919191915,
-      "total_penalty": 2023744.5114845813,
+      "total_penalty": 2079658.941161755,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.369570491406547,
-      "mape_pct": 6.369570491406547
+      "forecast_bias_pct": 6.411366554344851,
+      "mape_pct": 6.411366554344851
     },
     {
       "bias_offset": 0.06323232323232324,
-      "total_penalty": 2116856.65105769,
+      "total_penalty": 2176202.743584353,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.501103299966268,
-      "mape_pct": 6.501103299966268
+      "forecast_bias_pct": 6.54295104642195,
+      "mape_pct": 6.54295104642195
     },
     {
       "bias_offset": 0.06454545454545454,
-      "total_penalty": 2205877.187012869,
+      "total_penalty": 2265352.561160397,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.632636108525966,
-      "mape_pct": 6.632636108525966
+      "forecast_bias_pct": 6.674535538499027,
+      "mape_pct": 6.674535538499027
     },
     {
       "bias_offset": 0.06585858585858587,
-      "total_penalty": 2306688.283271499,
+      "total_penalty": 2351113.31472204,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.764168917085687,
-      "mape_pct": 6.764168917085687
+      "forecast_bias_pct": 6.806120030576128,
+      "mape_pct": 6.806120030576128
     },
     {
       "bias_offset": 0.06717171717171717,
-      "total_penalty": 2408572.0368568124,
+      "total_penalty": 2439139.935938444,
       "reliability_violations": 0,
-      "forecast_bias_pct": 6.895701725645409,
-      "mape_pct": 6.895701725645409
+      "forecast_bias_pct": 6.9377045226532275,
+      "mape_pct": 6.9377045226532275
     },
     {
       "bias_offset": 0.06848484848484848,
-      "total_penalty": 2505965.4244329394,
+      "total_penalty": 2532809.9898163355,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.0272345342051095,
-      "mape_pct": 7.0272345342051095
+      "forecast_bias_pct": 7.069289014730304,
+      "mape_pct": 7.069289014730304
     },
     {
       "bias_offset": 0.0697979797979798,
-      "total_penalty": 2602772.9941399405,
+      "total_penalty": 2629502.452649912,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.158767342764831,
-      "mape_pct": 7.158767342764831
+      "forecast_bias_pct": 7.200873506807404,
+      "mape_pct": 7.200873506807404
     },
     {
       "bias_offset": 0.07111111111111111,
-      "total_penalty": 2693921.34244047,
+      "total_penalty": 2721890.407613094,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.290300151324552,
-      "mape_pct": 7.290300151324552
+      "forecast_bias_pct": 7.332457998884505,
+      "mape_pct": 7.332457998884505
     },
     {
       "bias_offset": 0.07242424242424242,
-      "total_penalty": 2795500.269644441,
+      "total_penalty": 2820920.2520954423,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.421832959884274,
-      "mape_pct": 7.421832959884274
+      "forecast_bias_pct": 7.464042490961605,
+      "mape_pct": 7.464042490961605
     },
     {
       "bias_offset": 0.07373737373737374,
-      "total_penalty": 2890639.1277251504,
+      "total_penalty": 2921736.326309818,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.553365768443972,
-      "mape_pct": 7.553365768443972
+      "forecast_bias_pct": 7.595626983038681,
+      "mape_pct": 7.595626983038681
     },
     {
       "bias_offset": 0.07505050505050505,
-      "total_penalty": 2989699.0636270507,
+      "total_penalty": 3020491.765957082,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.684898577003694,
-      "mape_pct": 7.684898577003694
+      "forecast_bias_pct": 7.727211475115782,
+      "mape_pct": 7.727211475115782
     },
     {
       "bias_offset": 0.07636363636363637,
-      "total_penalty": 3100730.8426517346,
+      "total_penalty": 3121726.2877599034,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.8164313855634155,
-      "mape_pct": 7.8164313855634155
+      "forecast_bias_pct": 7.858795967192882,
+      "mape_pct": 7.858795967192882
     },
     {
       "bias_offset": 0.07767676767676768,
-      "total_penalty": 3197864.7862127605,
+      "total_penalty": 3215854.609283427,
       "reliability_violations": 0,
-      "forecast_bias_pct": 7.947964194123138,
-      "mape_pct": 7.947964194123138
+      "forecast_bias_pct": 7.990380459269981,
+      "mape_pct": 7.990380459269981
     },
     {
       "bias_offset": 0.07898989898989899,
-      "total_penalty": 3301129.501954209,
+      "total_penalty": 3325835.4263782413,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.079497002682835,
-      "mape_pct": 8.079497002682835
+      "forecast_bias_pct": 8.121964951347058,
+      "mape_pct": 8.121964951347058
     },
     {
       "bias_offset": 0.0803030303030303,
-      "total_penalty": 3416827.5810288116,
+      "total_penalty": 3441526.145945208,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.211029811242557,
-      "mape_pct": 8.211029811242557
+      "forecast_bias_pct": 8.25354944342416,
+      "mape_pct": 8.25354944342416
     },
     {
       "bias_offset": 0.08161616161616161,
-      "total_penalty": 3509561.2990121627,
+      "total_penalty": 3538148.546850379,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.342562619802278,
-      "mape_pct": 8.342562619802278
+      "forecast_bias_pct": 8.385133935501258,
+      "mape_pct": 8.385133935501258
     },
     {
       "bias_offset": 0.08292929292929294,
-      "total_penalty": 3604943.3349333797,
+      "total_penalty": 3640471.0104966783,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.474095428361979,
-      "mape_pct": 8.474095428361979
+      "forecast_bias_pct": 8.516718427578336,
+      "mape_pct": 8.516718427578336
     },
     {
       "bias_offset": 0.08424242424242424,
-      "total_penalty": 3694397.802842363,
+      "total_penalty": 3731825.362525886,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.6056282369217,
-      "mape_pct": 8.6056282369217
+      "forecast_bias_pct": 8.648302919655436,
+      "mape_pct": 8.648302919655436
     },
     {
       "bias_offset": 0.08555555555555555,
-      "total_penalty": 3783293.0737422574,
+      "total_penalty": 3821699.732144596,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.737161045481423,
-      "mape_pct": 8.737161045481423
+      "forecast_bias_pct": 8.779887411732537,
+      "mape_pct": 8.779887411732537
     },
     {
       "bias_offset": 0.08686868686868687,
-      "total_penalty": 3870890.7489416115,
+      "total_penalty": 3907435.3606169866,
       "reliability_violations": 0,
-      "forecast_bias_pct": 8.86869385404112,
-      "mape_pct": 8.86869385404112
+      "forecast_bias_pct": 8.911471903809613,
+      "mape_pct": 8.911471903809613
     },
     {
       "bias_offset": 0.08818181818181818,
-      "total_penalty": 3959237.974852229,
+      "total_penalty": 3989928.935053638,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.000226662600843,
-      "mape_pct": 9.000226662600843
+      "forecast_bias_pct": 9.043056395886714,
+      "mape_pct": 9.043056395886714
     },
     {
       "bias_offset": 0.0894949494949495,
-      "total_penalty": 4051407.24437994,
+      "total_penalty": 4077095.8207001723,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.131759471160564,
-      "mape_pct": 9.131759471160564
+      "forecast_bias_pct": 9.174640887963813,
+      "mape_pct": 9.174640887963813
     },
     {
       "bias_offset": 0.09080808080808081,
-      "total_penalty": 4136825.1602550903,
+      "total_penalty": 4168504.18666804,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.263292279720286,
-      "mape_pct": 9.263292279720286
+      "forecast_bias_pct": 9.306225380040912,
+      "mape_pct": 9.306225380040912
     },
     {
       "bias_offset": 0.09212121212121212,
-      "total_penalty": 4221925.872948066,
+      "total_penalty": 4248952.192424463,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.394825088279985,
-      "mape_pct": 9.394825088279985
+      "forecast_bias_pct": 9.43780987211799,
+      "mape_pct": 9.43780987211799
     },
     {
       "bias_offset": 0.09343434343434344,
-      "total_penalty": 4293233.786225763,
+      "total_penalty": 4318893.026327704,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.52635789683971,
-      "mape_pct": 9.52635789683971
+      "forecast_bias_pct": 9.56939436419509,
+      "mape_pct": 9.56939436419509
     },
     {
       "bias_offset": 0.09474747474747475,
-      "total_penalty": 4364846.045296218,
+      "total_penalty": 4389196.376541967,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.657890705399428,
-      "mape_pct": 9.657890705399428
+      "forecast_bias_pct": 9.70097885627219,
+      "mape_pct": 9.70097885627219
     },
     {
       "bias_offset": 0.09606060606060607,
-      "total_penalty": 4433634.287502317,
+      "total_penalty": 4454668.032392044,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.789423513959147,
-      "mape_pct": 9.789423513959147
+      "forecast_bias_pct": 9.832563348349288,
+      "mape_pct": 9.832563348349288
     },
     {
       "bias_offset": 0.09737373737373736,
-      "total_penalty": 4499329.436058426,
+      "total_penalty": 4520396.17793581,
       "reliability_violations": 0,
-      "forecast_bias_pct": 9.920956322518848,
-      "mape_pct": 9.920956322518848
+      "forecast_bias_pct": 9.964147840426367,
+      "mape_pct": 9.964147840426367
     },
     {
       "bias_offset": 0.09868686868686868,
-      "total_penalty": 4561457.277728122,
+      "total_penalty": 4581902.601229049,
       "reliability_violations": 0,
-      "forecast_bias_pct": 10.052489131078572,
-      "mape_pct": 10.052489131078572
+      "forecast_bias_pct": 10.095732332503466,
+      "mape_pct": 10.095732332503466
     },
     {
       "bias_offset": 0.1,
-      "total_penalty": 4621864.68853098,
+      "total_penalty": 4642944.10156144,
       "reliability_violations": 0,
-      "forecast_bias_pct": 10.184021939638292,
-      "mape_pct": 10.184021939638292
+      "forecast_bias_pct": 10.227316824580566,
+      "mape_pct": 10.227316824580566
     }
-  ]
+  ],
+  "risk_transparency": {
+    "total_penalty": 85610.4177141608,
+    "peak_penalty": 12181.351765551724,
+    "offpeak_penalty": 73429.06594860906,
+    "p95_abs_dev_pct": 2.3954228288056623,
+    "worst5_intervals": [
+      {
+        "interval": 2862,
+        "timestamp": "2021-05-30 19:30:00",
+        "abs_dev_pct": 3.6283769788210205,
+        "forecast": 1216.7323849084512,
+        "actual": 1174.130504,
+        "is_peak": true,
+        "penalty_impact": 255.61128545070733
+      },
+      {
+        "interval": 2917,
+        "timestamp": "2021-05-31 09:15:00",
+        "abs_dev_pct": 3.607246366294493,
+        "forecast": 1320.1658954445415,
+        "actual": 1274.20228,
+        "is_peak": false,
+        "penalty_impact": 275.78169266724944
+      },
+      {
+        "interval": 2629,
+        "timestamp": "2021-05-28 09:15:00",
+        "abs_dev_pct": 3.547830002152206,
+        "forecast": 1320.7165204649577,
+        "actual": 1275.465184,
+        "is_peak": false,
+        "penalty_impact": 271.508018789747
+      },
+      {
+        "interval": 1958,
+        "timestamp": "2021-05-21 09:30:00",
+        "abs_dev_pct": 3.525104220231757,
+        "forecast": 1283.6174695994212,
+        "actual": 1239.909372,
+        "is_peak": false,
+        "penalty_impact": 262.2485855965265
+      },
+      {
+        "interval": 2861,
+        "timestamp": "2021-05-30 19:15:00",
+        "abs_dev_pct": 3.486022437074872,
+        "forecast": 1166.5779746885783,
+        "actual": 1127.280716,
+        "is_peak": true,
+        "penalty_impact": 235.7835521314696
+      }
+    ],
+    "peak_vol_financial_impact": 838.297849333456,
+    "reliability_violations": 0,
+    "mape_pct": 1.048375125434003,
+    "forecast_bias_pct": -0.08165286425259065
+  }
 }

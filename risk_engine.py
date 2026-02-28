@@ -22,6 +22,7 @@ def monte_carlo_penalty_simulation(
     n_simulations: int = MC_SIMULATIONS,
     load_noise_pct: float = MC_LOAD_NOISE_PCT,
     seed: int = 42,
+    financial_cap: float = FINANCIAL_CAP,
 ) -> Dict:
     """
     Monte Carlo simulation: perturb actuals with Gaussian noise
@@ -58,9 +59,11 @@ def monte_carlo_penalty_simulation(
         "var_95": float(np.percentile(penalties, 95)),
         "var_99": float(np.percentile(penalties, 99)),
         "cvar_95": float(np.mean(penalties[penalties >= np.percentile(penalties, 95)])),
+        "var_95_cap_utilization_pct": float(np.percentile(penalties, 95) / financial_cap * 100),
+        "cvar_95_cap_utilization_pct": float(np.mean(penalties[penalties >= np.percentile(penalties, 95)]) / financial_cap * 100),
         "max_penalty": float(np.max(penalties)),
         "min_penalty": float(np.min(penalties)),
-        "cap_breach_prob": float(np.mean(penalties > FINANCIAL_CAP)),
+        "cap_breach_prob": float(np.mean(penalties > financial_cap)),
         "mean_violations": float(np.mean(violations_arr)),
         "mean_bias_pct": float(np.mean(bias_arr)),
         "penalty_distribution": penalties.tolist(),
@@ -128,6 +131,7 @@ def sensitivity_analysis(
     actual: np.ndarray,
     is_peak: np.ndarray,
     regime: str = "tiered",
+    financial_cap: float = FINANCIAL_CAP,
 ) -> pd.DataFrame:
     """
     Sensitivity analysis: how penalty changes across
@@ -145,7 +149,7 @@ def sensitivity_analysis(
                 "total_penalty": summary["total_penalty"] * rate_mult,
                 "reliability_violations": summary["reliability_violations"],
                 "forecast_bias_pct": summary["forecast_bias_pct"],
-                "cap_compliant": summary["total_penalty"] * rate_mult <= FINANCIAL_CAP,
+                "cap_compliant": summary["total_penalty"] * rate_mult <= financial_cap,
             })
 
     return pd.DataFrame(rows)

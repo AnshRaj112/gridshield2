@@ -15,6 +15,9 @@ from config import (
     BIAS_LOWER_BOUND, BIAS_UPPER_BOUND, PEAK_START_HOUR, PEAK_END_HOUR,
     PENALTY_UNDER_BASE, PENALTY_OVER_BASE,
 )
+from optimizer import optimize_quantile_buffer, compute_risk_transparency_outputs
+from risk_engine import monte_carlo_penalty_simulation
+from penalty import compute_full_penalty
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -116,54 +119,135 @@ def mc(txt, cls=""):
     return f'<div class="metric-card">{txt}</div>'
 
 
+@st.cache_data(show_spinner=False)
+def run_dynamic_optimization(base_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
+    """Run the constrained Lagrangian grid search dynamically based on the requested cap."""
+    return optimize_quantile_buffer(base_forecast, actual, is_peak, regime="tiered", financial_cap=cap)
+
+@st.cache_data(show_spinner=False)
+def run_dynamic_mc(optimized_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
+    """Run fast Monte Carlo to get expected mean and VaR for the dynamically optimized forecast."""
+    return monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=500, financial_cap=cap)
+
+
+@st.cache_data(show_spinner=False)
+def run_dynamic_rt(base_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, timestamps, cap: float):
+    """Run Risk Transparency outputs for the dynamically optimized forecast."""
+    return compute_risk_transparency_outputs(base_forecast, actual, is_peak, timestamps=timestamps, regime="tiered", financial_cap=cap)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 1 : EXECUTIVE SUMMARY
 # ═══════════════════════════════════════════════════════════════════════════════
-def page_executive_summary(state, test_iv, cap_val):
+def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, dyn_rt=None):
     st.markdown("## 📊 Executive Summary")
 
     total_penalty = test_iv["penalty"].sum()
+    peak_pen = test_iv.loc[test_iv["is_peak"] == 1, "penalty"].sum()
+    offpeak_pen = test_iv.loc[test_iv["is_peak"] == 0, "penalty"].sum()
+    
     bt = state.get("backtest_tiered", {})
-    mc_data = state.get("mc_summary", {})
-    mape = bt.get("mape_pct", 0)
-    violations = bt.get("reliability_violations", 0)
-    bias = bt.get("forecast_bias_pct", 0)
+    mc_data = dyn_mc if dyn_mc else state.get("mc_summary", {})
+    
+    act = test_iv["actual"].replace(0, np.nan)
+    fc = test_iv["forecast"]
+    mape = float(np.abs((fc - act) / act).mean() * 100)
+    bias = float(((fc - act) / act).mean() * 100)
+    
+    # Reliability constraint: only during peak hours
+    underest_pct = np.where(act != 0, (act - fc) / act, 0.0)
+    violations = int(np.sum((underest_pct > 0.05) & test_iv["is_peak"]))
+
     in_bounds = BIAS_LOWER_BOUND * 100 <= bias <= BIAS_UPPER_BOUND * 100
 
+    rt = dyn_rt if dyn_rt else state.get("risk_transparency", {})
+    
     # ── KPI cards ─────────────────────────────────────────────────────────
+    st.markdown("### Stage 3: Mandated Financial Exposure")
     c1, c2, c3, c4, c5 = st.columns(5)
+    
     with c1:
-        s = "status-good" if total_penalty < cap_val else "status-bad"
-        st.markdown(mc(f'<div class="label">Total Penalty</div><div class="value {s}">₹{total_penalty:,.0f}</div>'), unsafe_allow_html=True)
+        s = "status-good" if total_penalty <= cap_val else "status-bad"
+        st.markdown(mc(f'<div class="label">Total Expected Exposure</div><div class="value {s}">₹{total_penalty:,.0f}</div>'), unsafe_allow_html=True)
     with c2:
-        s = "status-good" if mape < 5 else "status-bad"
-        st.markdown(mc(f'<div class="label">MAPE</div><div class="value {s}">{mape:.2f}%</div>'), unsafe_allow_html=True)
+        st.markdown(mc(f'<div class="label">Peak-Hour Contribution</div><div class="value">₹{peak_pen:,.0f}</div>'), unsafe_allow_html=True)
     with c3:
-        s = "status-good" if violations <= MAX_RELIABILITY_VIOLATIONS else "status-bad"
-        st.markdown(mc(f'<div class="label">Reliability Violations</div><div class="value {s}">{violations} / {MAX_RELIABILITY_VIOLATIONS}</div>'), unsafe_allow_html=True)
+        st.markdown(mc(f'<div class="label">Off-Peak Contribution</div><div class="value">₹{offpeak_pen:,.0f}</div>'), unsafe_allow_html=True)
     with c4:
         s = "status-good" if in_bounds else "status-bad"
         st.markdown(mc(f'<div class="label">Forecast Bias</div><div class="value {s}">{bias:+.2f}%</div>'), unsafe_allow_html=True)
     with c5:
         var95 = mc_data.get("var_95", 0)
-        st.markdown(mc(f'<div class="label">VaR (95%)</div><div class="value" style="color:#42a5f5">₹{var95:,.0f}</div>'), unsafe_allow_html=True)
+        s = "status-good" if var95 <= cap_val else "status-bad"
+        st.markdown(mc(f'<div class="label">VaR (95%)</div><div class="value {s}">₹{var95:,.0f}</div>'), unsafe_allow_html=True)
 
     # ── Gauge row ─────────────────────────────────────────────────────────
     g1, g2 = st.columns(2)
+    
     with g1:
         st.markdown("### Financial Cap Utilization")
-        cu = total_penalty / cap_val * 100
+        
+        # --- Dual Perspective Toggle ---
+        perspective = st.segmented_control(
+            "Perspective",
+            ["Realized (Backtest)", "Projected (Simulation)"],
+            default="Realized (Backtest)",
+            label_visibility="collapsed"
+        )
+        
+        mc_mean = mc_data.get("mean_penalty", 0)
+        
+        if perspective == "Realized (Backtest)":
+            display_val = total_penalty
+            cu = total_penalty / cap_val * 100
+            label = "Realized Penalty"
+            delta_ref = 100
+        else:
+            display_val = mc_mean
+            cu = mc_mean / cap_val * 100
+            label = "Expected Mean"
+            delta_ref = total_penalty / cap_val * 100 if cap_val > 0 else 100
+
         fig = go.Figure(go.Indicator(
             mode="gauge+number+delta", value=cu,
+            title={"text": f"{label} vs Cap: ₹{cap_val:,.0f}", "font": {"size": 14}},
             number={"suffix": "%", "font": {"size": 36}},
-            delta={"reference": 100, "decreasing": {"color": "#00e676"}},
+            delta={"reference": delta_ref, "position": "top", "increasing": {"color": "#ef5350"}, "decreasing": {"color": "#00e676"}},
             gauge={"axis": {"range": [0, max(150, cu + 20)]},
                    "steps": [{"range": [0, 90], "color": "rgba(0,230,118,0.15)"},
-                             {"range": [90, max(150, cu + 20)], "color": "rgba(239,83,80,0.15)"}],
+                             {"range": [90, 100], "color": "rgba(255,167,38,0.25)"},
+                             {"range": [100, max(150, cu + 20)], "color": "rgba(239,83,80,0.35)"}],
+                   "bar": {"color": "#ef5350" if cu > 100 else "#42a5f5"},
                    "threshold": {"line": {"color": "#ef5350", "width": 3}, "value": 100}}
         ))
         fig.update_layout(**DARK_CHART, height=320, margin=dict(t=20, b=20))
         st.plotly_chart(fig, use_container_width=True)
+
+        # Strategic Infeasibility Badge
+        is_feasible = dyn_opt["is_feasible"] if dyn_opt else (mc_mean <= cap_val)
+        min_cap = dyn_opt.get("minimum_required_cap", 0) if dyn_opt else 0
+        
+        if not is_feasible:
+            msg = (
+                "🚨 **STRUCTURAL INFEASIBILITY DETECTED**\n\n"
+                "Cap below mathematical compliance floor. "
+                f"Even under the optimized scenario, expected exposure exceeds the ₹{cap_val:,.0f} budget."
+            )
+            if min_cap > 0:
+                msg += f"\n\n**Minimum Required Cap:** ₹{min_cap:,.0f}"
+                
+            st.error(msg)
+            
+            st.info(
+                "**Why the extreme projection?**\n\n"
+                "The Monte Carlo simulation Stress-Tests your forecast against potential load volatility. "
+                "Because Stage 2/3 regulations use **Tiered Penalties**, once errors exceed 7%, the cost "
+                "jumps to **₹12/unit**. This 'Volatility Magnification' means a small increase in error "
+                "leads to a massive exponential jump in financial exposure."
+            )
+            st.button("📋 Generate Board Advisory Report", type="primary")
+        else:
+            st.success("✅ **Board Directive Compliant**\n\nAll constraints successfully satisfied under the dynamic cap.")
 
     with g2:
         st.markdown("### Bias Tracking")
@@ -180,21 +264,93 @@ def page_executive_summary(state, test_iv, cap_val):
         st.plotly_chart(fig, use_container_width=True)
 
     # ── Monetary exposure ─────────────────────────────────────────────────
-    st.markdown("### 💵 Expected Monetary Exposure")
+    st.markdown("### 💵 Expected Monetary Exposure (Simulated Monte Carlo)")
+    st.caption("*Note: Forecast accuracy metrics (e.g., MAPE) are calculated on a relative percentage scale, whereas financial exposure scales absolutely based on fixed volumetric thresholds and asymmetric multipliers. Low relative errors can still trigger high financial penalties.*")
     e1, e2, e3, e4 = st.columns(4)
     e1.metric("Mean Penalty", f"₹{mc_data.get('mean_penalty', 0):,.0f}")
     e2.metric("VaR (95%)", f"₹{mc_data.get('var_95', 0):,.0f}")
     e3.metric("CVaR (95%)", f"₹{mc_data.get('cvar_95', 0):,.0f}")
-    e4.metric("Cap Breach Prob", f"{mc_data.get('cap_breach_prob', 0) * 100:.1f}%")
+    
+    breach_prob = mc_data.get('cap_breach_prob', 0)
+    if breach_prob >= 0.999:
+        e4.metric("Cap Breach Risk", "Deterministic (>99.9%)")
+    else:
+        e4.metric("Cap Breach Risk", f"{breach_prob * 100:.1f}%")
 
     # ── Model Performance ─────────────────────────────────────────────────
     st.markdown("### 📋 Model Performance by Horizon")
     metrics = state.get("model_metrics", {})
     if metrics:
-        rows = [{"Horizon": k, "MAE (kW)": f"{v['mae']:.1f}",
-                 "RMSE (kW)": f"{v['rmse']:.1f}", "MAPE (%)": f"{v['mape']:.2f}",
-                 "Bias (%)": f"{v['bias_pct']:+.2f}"} for k, v in metrics.items()]
+        rows = [
+            {
+                "Horizon": k,
+                "Avg Penalty (₹)": f"{v.get('financial_penalty', v.get('total_penalty', 0)):,.0f}",
+                "MAPE (%)": f"{v.get('mape', v.get('mape_pct', 0)):.2f}",
+                "Bias (%)": f"{v.get('bias_pct', 0):+.2f}",
+                "Reliability Violations": int(v.get('reliability_violations', 0)),
+            }
+            for k, v in metrics.items()
+        ]
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+
+    # ── Derived Risk Interpretation ───────────────────────────────────────
+    st.markdown("### 🧠 Automated Risk Interpretation")
+    
+    risk_level = "CRITICAL" if cu > 100 or violations > MAX_RELIABILITY_VIOLATIONS else "WARNING" if cu > 80 else "NOMINAL"
+    color = "#ef5350" if risk_level == "CRITICAL" else "#ffa726" if risk_level == "WARNING" else "#00e676"
+    
+    interpretation = f"""
+    <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-left: 4px solid {color}; border-radius: 4px; margin-bottom: 2rem;">
+        <h4 style="margin-top:0; color:{color}">System Status: {risk_level}</h4>
+    """
+    if mape < 5 and cu > 100:
+        interpretation += f"<p><strong>Paradox Detected:</strong> The physical forecast accuracy is excellent (MAPE = {mape:.2f}%), yet the financial cap is breached ({cu:.1f}% utilization). This disconnect occurs because small volumetric errors during peak hours are penalized heavily (asymmetrically). To fix this, the optimizer must prioritize bias offsetting during expensive peak segments, sacrificing raw MAPE for financial stability.</p>"
+    elif cu > 100:
+        interpretation += f"<p><strong>Financial Breach:</strong> The system is currently breaching the fixed regulatory budget by {cu - 100:.1f}%. Immediate recalibration of peak-hour quantile buffers is required.</p>"
+    elif violations > MAX_RELIABILITY_VIOLATIONS:
+        interpretation += f"<p><strong>Reliability Warning:</strong> Financial exposure is within limits, but reliability violations ({violations}) exceed the allowed maximum ({MAX_RELIABILITY_VIOLATIONS}). The model is artificially suppressing forecasts too much to save money, leading to unacceptable physical shortfall risk.</p>"
+    else:
+        interpretation += "<p><strong>Balanced State:</strong> The current forecast model operates within both the financial constraints and physical reliability limits. Peak buffers are appropriately calibrated to offset asymmetrical risks without triggering outages.</p>"
+
+    interpretation += "</div>"
+    st.markdown(interpretation, unsafe_allow_html=True)
+
+    # ── Stage 3: Risk Transparency Mandatory Outputs ──────────────────────────
+    rt = dyn_rt if dyn_rt else state.get("risk_transparency", {})
+    if rt:
+        st.markdown("### 🔎 Stage 3 – Risk Transparency Mandatory Outputs")
+
+        # Core penalty split
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total Penalty (₹)", f"₹{rt.get('total_penalty', 0):,.0f}")
+        c2.metric("Peak-Hour Penalty (₹)", f"₹{rt.get('peak_penalty', 0):,.0f}")
+        c3.metric("Off-Peak Penalty (₹)", f"₹{rt.get('offpeak_penalty', 0):,.0f}")
+
+        d1, d2 = st.columns(2)
+        d1.metric("P95 Absolute Deviation", f"{rt.get('p95_abs_dev_pct', 0):.2f}%")
+        d2.metric("Peak Volatility Impact (₹)", f"₹{rt.get('peak_vol_financial_impact', 0):,.0f}")
+
+        # Worst 5 deviation intervals
+        w5 = rt.get("worst5_intervals", [])
+        if w5:
+            st.markdown("#### 🚨 Worst 5 Deviation Intervals")
+            
+            # Use timestamp if available from the new backend, else fallback to Interval #
+            rows = []
+            for r in w5:
+                row = {
+                    "Timestamp/Interval": r.get('timestamp') or f"Interval {r['interval']}",
+                    "Abs Dev (%)": f"{r['abs_dev_pct']:.2f}",
+                    "Forecast (MW)": f"{r['forecast']:.1f}",
+                    "Actual (MW)": f"{r['actual']:.1f}",
+                    "Peak Hour": "✓" if r["is_peak"] else "—",
+                }
+                if "penalty_impact" in r:
+                    row["₹ Impact"] = f"₹{r['penalty_impact']:,.0f}"
+                rows.append(row)
+                
+            w5_df = pd.DataFrame(rows)
+            st.dataframe(w5_df, use_container_width=True, hide_index=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -599,12 +755,58 @@ def main():
     st.sidebar.info(f"**Derived Target Quantiles:**\n* Off-peak: `{q_offpeak:.3f}`\n* Peak: `{q_peak:.3f}`")
     
     st.sidebar.markdown("---")
-    cap_val = st.sidebar.number_input("💰 Financial Cap (₹)",
-                                       value=int(FINANCIAL_CAP), step=10000)
+    st.sidebar.markdown("## 🎯 Board Directives")
+    
+    # Calculate Stage 2 baseline
+    has_base = "base_forecast" in test_intervals.columns
+    if has_base:
+        base_penalties = compute_full_penalty(
+            test_intervals["base_forecast"].values,
+            test_intervals["actual"].values,
+            test_intervals["is_peak"].values,
+            "stage2_shock"
+        )
+        stage2_baseline = base_penalties.sum()
+    else:
+        stage2_baseline = FINANCIAL_CAP * 1.5  # fallback
+        
+    # Input explicit absolute Cap X
+    cap_val = st.sidebar.number_input(
+        "💰 Financial Cap X (₹)",
+        value=int(FINANCIAL_CAP),
+        step=5000,
+        help="Absolute budget limit set by the Board."
+    )
+    
+    # Compute the resultant required margin
+    # required_margin_pct = ((stage2_baseline - cap_val) / stage2_baseline * 100) if stage2_baseline > 0 else 0
+    # st.sidebar.info(
+    #     f"**Stage 2 Baseline Exposure:** ₹{stage2_baseline:,.0f}\n\n"
+    #     f"**Required Improvement:** `{required_margin_pct:.1f}%` margin over baseline"
+    # )
+    
+    # Run dynamic Lagrangian optimizer if base forecast is available
+    dyn_opt = None
+    dyn_mc = None
+    dyn_rt = None
+    test_iv = test_intervals.copy()
+    
+    if has_base:
+        with st.spinner("Solving strict constraints..."):
+            dyn_opt = run_dynamic_optimization(test_iv["base_forecast"].values, test_iv["actual"].values, test_iv["is_peak"].values, cap_val)
+            
+            # Apply dynamic offsets
+            test_iv["forecast"] = test_iv["base_forecast"].copy()
+            peak_mask = test_iv["is_peak"] == 1
+            test_iv.loc[peak_mask, "forecast"] *= (1 + dyn_opt["peak_buffer"])
+            test_iv.loc[~peak_mask, "forecast"] *= (1 + dyn_opt["offpeak_buffer"])
+            
+            dyn_mc = run_dynamic_mc(test_iv["forecast"].values, test_iv["actual"].values, test_iv["is_peak"].values, cap_val)
+            dyn_rt = run_dynamic_rt(test_iv["forecast"].values, test_iv["actual"].values, test_iv["is_peak"].values, test_iv["timestamp"], cap_val)
+    
     show_days = st.sidebar.slider("📅 Days to Display", 7, 365, 30)
 
     # ── Live recalculation ────────────────────────────────────────────────
-    test_iv = test_intervals.copy()
     test_iv["penalty"] = calc_live_penalty(test_iv, pu_offpeak, pu_peak, po)
 
     train_iv = None
@@ -619,7 +821,7 @@ def main():
 
     # ── Page routing ──────────────────────────────────────────────────────
     if page == "Executive Summary":
-        page_executive_summary(state, test_iv, cap_val)
+        page_executive_summary(state, test_iv, cap_val, dyn_opt, dyn_mc, dyn_rt)
     elif page == "Forecast Analysis":
         page_forecast_analysis(state, test_iv, show_days)
     elif page == "Train vs Test":

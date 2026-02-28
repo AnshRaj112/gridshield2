@@ -32,9 +32,9 @@ costs scale from ₹4 to ₹6.
 
 ### Multi-Horizon Support
 Separate models trained for each forecast horizon:
-- **t+1**: MAE=4.83 kW, RMSE=9.41 kW, MAPE=0.46%, Bias=+0.16%
-- **t+96**: MAE=66.25 kW, RMSE=94.33 kW, MAPE=6.20%, Bias=+5.24%
-- **t+288**: MAE=140.02 kW, RMSE=184.91 kW, MAPE=13.01%, Bias=+12.28%
+- **t+1**: Avg Penalty=₹461,896.08, MAPE=0.45%, Bias=+0.18%, Reliability Violations=1
+- **t+96**: Avg Penalty=₹28,464,179.07, MAPE=6.46%, Bias=+5.44%, Reliability Violations=133
+- **t+288**: Avg Penalty=₹61,231,999.29, MAPE=12.02%, Bias=+10.86%, Reliability Violations=465
 
 | Category | Features |
 |----------|----------|

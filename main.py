@@ -20,7 +20,7 @@ from validation import get_feature_columns, verify_no_leakage
 from models import MultiHorizonForecaster, HybridEnsemble
 from penalty import compute_penalty_summary, compute_full_penalty
 from backtest import run_backtest, format_backtest_report, compute_interval_penalties
-from optimizer import find_optimal_bias, optimize_quantile_buffer, pareto_frontier
+from optimizer import find_optimal_bias, optimize_quantile_buffer, pareto_frontier, compute_risk_transparency_outputs
 from risk_engine import (
     monte_carlo_penalty_simulation, scenario_simulation, sensitivity_analysis,
 )
@@ -29,6 +29,8 @@ from risk_strategy import compute_risk_strategy, generate_strategy_report
 
 def run_pipeline():
     """Execute the full GridShield pipeline."""
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
     start = time.time()
     os.makedirs(DOCS_DIR, exist_ok=True)
 
@@ -148,10 +150,19 @@ def run_pipeline():
     buffer_result = optimize_quantile_buffer(
         forecast, actual, is_peak, regime="tiered"
     )
-    if "total_penalty" in buffer_result:
-        print(f"  Peak buffer: {buffer_result['peak_buffer']*100:.2f}%")
-        print(f"  Off-peak buffer: {buffer_result['offpeak_buffer']*100:.2f}%")
-        print(f"  Buffered penalty: ₹{buffer_result['total_penalty']:,.2f}")
+    if buffer_result.get("is_feasible"):
+        print(f"  Configuration (Peak Buffer): {buffer_result['peak_buffer']*100:.2f}%")
+        print(f"  Configuration (Off-Peak Buffer): {buffer_result['offpeak_buffer']*100:.2f}%")
+        print(f"  Final Expected Penalty: ₹{buffer_result['total_penalty']:,.2f}")
+        print(f"  VaR (95%): ₹{buffer_result['var_95']:,.2f}")
+        print(f"  Cap Utilization: {buffer_result['cap_utilization_pct']:.1f}%")
+        print(f"  Reliability Count: {buffer_result['reliability_violations']}")
+        print(f"  Bias: {buffer_result['forecast_bias_pct']:+.2f}%")
+        print(f"  Proof of Constraint Satisfaction: {'✓ Verified Feasible'}")
+    else:
+        print(f"  WARNING: {buffer_result.get('warning')}")
+        print(f"  Calculated Minimum Required Cap: ₹{buffer_result.get('minimum_required_cap', 0):,.2f}")
+        print(f"  Note: Current cap (₹{FINANCIAL_CAP:,.0f}) structurally impossible under current parameters.")
 
     print("\n[4.3] Generating Pareto frontier...")
     pareto, all_points = pareto_frontier(forecast, actual, is_peak)
@@ -164,15 +175,18 @@ def run_pipeline():
     print("STAGE 5: MONTE CARLO RISK SIMULATION")
     print("=" * 70)
 
-    # Apply optimized bias
-    optimized_forecast = forecast * (1 + opt_result["bias_offset"])
+    # Apply optimized bias from optimize_quantile_buffer to enforce peak/off-peak targeted reduction
+    optimized_forecast = forecast.copy()
+    peak_mask_main = is_peak == 1
+    optimized_forecast[peak_mask_main] *= (1 + buffer_result["peak_buffer"])
+    optimized_forecast[~peak_mask_main] *= (1 + buffer_result["offpeak_buffer"])
 
     mc_results = monte_carlo_penalty_simulation(
         optimized_forecast, actual, is_peak, regime="tiered", n_simulations=1000
     )
     print(f"\n  Mean Penalty:  ₹{mc_results['mean_penalty']:,.2f}")
-    print(f"  VaR (95%):     ₹{mc_results['var_95']:,.2f}")
-    print(f"  CVaR (95%):    ₹{mc_results['cvar_95']:,.2f}")
+    print(f"  VaR (95%):     ₹{mc_results['var_95']:,.2f} ({mc_results['var_95_cap_utilization_pct']:.1f}% Cap Util)")
+    print(f"  CVaR (95%):    ₹{mc_results['cvar_95']:,.2f} ({mc_results['cvar_95_cap_utilization_pct']:.1f}% Cap Util)")
     print(f"  Cap Breach Prob: {mc_results['cap_breach_prob']*100:.1f}%")
 
     # Scenario simulations
@@ -204,7 +218,7 @@ def run_pipeline():
 
     strategy = compute_risk_strategy(
         optimized_forecast, actual, is_peak,
-        mc_results, opt_result, primary_backtest,
+        mc_results, buffer_result, primary_backtest,
     )
     strategy_report = generate_strategy_report(strategy)
     print(strategy_report)
@@ -227,7 +241,7 @@ def run_pipeline():
 
     # Save interval-level data for dashboard (TEST data)
     interval_df = compute_interval_penalties(
-        optimized_forecast, actual, is_peak, timestamps, "tiered"
+        optimized_forecast, actual, is_peak, timestamps, "tiered", base_forecast=forecast
     )
     interval_df.to_csv(os.path.join(DOCS_DIR, "interval_penalties.csv"), index=False)
 
@@ -295,14 +309,18 @@ def run_pipeline():
         "backtest_tiered": primary_backtest["model"],
         "backtest_stage2": all_backtest_results["stage2_shock"]["model"],
         "optimizer": {
-            "bias_offset": opt_result["bias_offset"],
-            "total_penalty": opt_result["total_penalty"],
+            "peak_buffer": buffer_result["peak_buffer"],
+            "offpeak_buffer": buffer_result["offpeak_buffer"],
+            "total_penalty": buffer_result["total_penalty"],
         },
         "mc_summary": {k: v for k, v in mc_results.items()
                        if k not in ["penalty_distribution", "violation_distribution"]},
         "scenario_results": scenario_results,
         "strategy": strategy,
         "pareto_points": all_points,
+        "risk_transparency": compute_risk_transparency_outputs(
+            optimized_forecast, actual, is_peak, timestamps=timestamps, regime="tiered"
+        ),
     }
 
     # Convert numpy types for JSON serialization
@@ -369,9 +387,10 @@ def generate_output_a(forecaster: MultiHorizonForecaster):
     lines.append("### Multi-Horizon Support")
     lines.append("Separate models trained for each forecast horizon:")
     for name, metrics in forecaster.metrics.items():
-        lines.append(f"- **{name}**: MAE={metrics['mae']:.2f} kW, "
-                     f"RMSE={metrics['rmse']:.2f} kW, MAPE={metrics['mape']:.2f}%, "
-                     f"Bias={metrics['bias_pct']:+.2f}%")
+        lines.append(f"- **{name}**: Avg Penalty=₹{metrics.get('financial_penalty', 0):,.2f}, "
+                     f"MAPE={metrics.get('mape', metrics.get('mape_pct', 0)):.2f}%, "
+                     f"Bias={metrics.get('bias_pct', 0):+.2f}%, "
+                     f"Reliability Violations={metrics.get('reliability_violations', 0)}")
     lines.append("")
     lines.append("| Category | Features |")
     lines.append("|----------|----------|")

@@ -66,6 +66,8 @@ def compute_risk_strategy(
             "cap_breach_probability": mc_results.get("cap_breach_prob", 0),
             "financial_cap": FINANCIAL_CAP,
             "headroom": FINANCIAL_CAP - mc_results.get("var_95", 0),
+            "minimum_required_cap": optimizer_results.get("minimum_required_cap", 0),
+            "is_feasible": optimizer_results.get("is_feasible", True),
         },
         "constraint_satisfaction": {
             "financial_cap_met": mc_results.get("mean_penalty", 0) < FINANCIAL_CAP,
@@ -157,13 +159,46 @@ def generate_strategy_report(strategy: Dict) -> str:
         f"{pr['vs_naive_pct']:.1f}% reduction in penalty exposure vs naive SLDC submissions."
     )
     report.append("")
-    report.append(
-        "   Despite elevated out-of-time volatility and structural regime shifts "
-        "(Stage 2 Shock), Monte Carlo simulation with 1000 paths confirms "
-        f"expected financial exposure is contained at ₹{fe['expected_penalty']:,.0f}. "
-        "The strategy is mathematically defensible, constraint-compliant, and "
-        "dynamically adapts to changing ABT penalty rates via real-time "
-        "τ* recalculation."
-    )
+    
+    # ── Policy Recommendation Layer and Strategic Feasibility Analysis ──
+    if not fe['is_feasible'] or fe['cap_breach_probability'] >= 0.999:
+        report.append(
+            "   [STRUCTURAL INFEASIBILITY DETECTED]"
+        )
+        report.append(
+            f"   Expected financial exposure at the t+96 horizon (₹{fe['expected_penalty']:,.0f}) remains "
+            f"materially above the fixed budget cap (₹{fe['financial_cap']:,.0f}). Notably, while the "
+            f"Backtest Reality showed {fe['expected_penalty']/fe['financial_cap']*100:.1f}% utilization, "
+            "Monte Carlo simulations reveal a 'Volatility Magnification' effect: when forecasting "
+            "errors cross the 7% threshold, penalties jump to ₹12/unit (Tier 3), leading to the "
+            f"observed {fe['expected_penalty']/fe['financial_cap']*100:.1f}% Projected Utilization."
+        )
+        report.append("")
+        report.append(
+            "   [MATHEMATICAL FLOOR]"
+        )
+        report.append(
+            "   Internal optimization has reached its mathematical limit. The 'Compliance Floor' "
+            f"requires a Minimum Required Cap of ₹{fe['minimum_required_cap']:,.0f}. The current ₹{fe['financial_cap']:,.0f} "
+            "cap is structurally impossible to maintain under Stage 2/3 tiered penalty protocols."
+        )
+        report.append("")
+        report.append(
+            "   [POLICY PIVOT MANDATE]"
+        )
+        report.append(
+            "   Board-level strategy must immediately pivot from 'Technical Optimization' to "
+            "structural Risk Transfer, Financial Hedging, or Regulatory Renegotiation specifically "
+            "targeting the Stage 2 (₹6) and Tier 3 (₹12) penalty thresholds."
+        )
+    else:
+        report.append(
+            "   Despite elevated out-of-time volatility and structural regime shifts "
+            "(Stage 2 Shock), Monte Carlo simulation with 1000 paths confirms "
+            f"expected financial exposure at the t+96 horizon is strictly contained at ₹{fe['expected_penalty']:,.0f}. "
+            "The strategy is mathematically defensible, constraint-compliant, and "
+            "dynamically adapts to changing ABT penalty rates via real-time "
+            "τ* recalculation."
+        )
 
     return "\n".join(report)

@@ -98,13 +98,14 @@ def compute_interval_penalties(
     is_peak: np.ndarray,
     timestamps: pd.DatetimeIndex,
     regime: str = "tiered",
+    base_forecast: np.ndarray = None,
 ) -> pd.DataFrame:
     """Return per-interval penalty breakdown for dashboard visualization."""
     deviation = compute_deviation(forecast, actual)
     pct_deviation = compute_pct_deviation(forecast, actual)
     penalty = compute_full_penalty(forecast, actual, is_peak, regime)
 
-    df = pd.DataFrame({
+    data = {
         "timestamp": timestamps,
         "forecast": forecast,
         "actual": actual,
@@ -113,5 +114,10 @@ def compute_interval_penalties(
         "penalty": penalty,
         "is_peak": is_peak,
         "cumulative_penalty": np.cumsum(penalty),
-    })
+    }
+    
+    if base_forecast is not None:
+        data["base_forecast"] = base_forecast
+
+    df = pd.DataFrame(data)
     return df
