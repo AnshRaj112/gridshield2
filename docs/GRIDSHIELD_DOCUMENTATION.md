@@ -191,8 +191,8 @@ The peak multiplier changes the optimal forecast quantile:
 |--------|-----------|----------|
 | Off-peak | 4/(4+2) | 0.667 |
 | **Peak** | **(4×2)/(4×2+2)** | **0.800** |
-| Stage 2 Off-peak | 6/(6+2) | 0.750 |
-| Stage 2 Peak | (6×2)/(6×2+2) | 0.857 |
+| Stage 2 Off-peak | 4/(4+2) | 0.667 |
+| Stage 2 Peak | 6/(6+2) | 0.750 |
 
 Higher τ* during peak = model forecasts higher = more overforecasting = fewer underforecast penalties.
 
