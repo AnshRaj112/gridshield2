@@ -542,4 +542,15 @@ def generate_output_c(strategy_report: str, mc_results: dict,
 
 
 if __name__ == "__main__":
-    run_pipeline()
+    import sys
+    import os
+    
+    # Check if executed by Streamlit (which is often the default on Streamlit Cloud)
+    # If main.py is set as the entrypoint, it will crash/timeout trying to run the whole pipeline.
+    is_streamlit = "streamlit" in sys.modules or os.environ.get("STREAMLIT_SERVER_PORT") or os.environ.get("STREAMLIT_SERVER_HEADLESS")
+    
+    if is_streamlit:
+        import dashboard
+        dashboard.main()
+    else:
+        run_pipeline()
