@@ -224,10 +224,19 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
         st.plotly_chart(fig, use_container_width=True)
 
         # Strategic Infeasibility Badge
-        is_feasible = dyn_opt["is_feasible"] if dyn_opt else (mc_mean <= cap_val)
-        min_cap = dyn_opt.get("minimum_required_cap", 0) if dyn_opt else 0
+        # Realized is total_penalty, Projected is mc_mean
+        realized_breach = total_penalty > cap_val
+        projected_breach = mc_mean > cap_val
+        min_cap_breach = False
+        min_cap = 0
         
-        if not is_feasible:
+        if dyn_opt:
+            min_cap = dyn_opt.get("minimum_required_cap", 0)
+            min_cap_breach = (min_cap > cap_val)
+            
+        is_structurally_infeasible = projected_breach and min_cap_breach
+
+        if is_structurally_infeasible and realized_breach:
             msg = (
                 "🚨 **STRUCTURAL INFEASIBILITY DETECTED**\n\n"
                 "Cap below mathematical compliance floor. "
@@ -246,8 +255,19 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
                 "leads to a massive exponential jump in financial exposure."
             )
             st.button("📋 Generate Board Advisory Report", type="primary")
+            
+        elif not realized_breach and projected_breach:
+            st.warning(
+                "⚠️ **Volatility Risk Alert**\n\n"
+                "Backtest is compliant, but stress simulations exceed budget under extreme volatility."
+            )
+            
+        elif not realized_breach and not projected_breach:
+            st.success("✅ **Directive Compliant**")
+            
         else:
-            st.success("✅ **Board Directive Compliant**\n\nAll constraints successfully satisfied under the dynamic cap.")
+            # Fallback for realized breach but not projected breach (unlikely but possible)
+            st.error("🚨 **Realized Exposure Breach**\n\nThe historical backtest exceeds the cap, though mean simulated risk is lower.")
 
     with g2:
         st.markdown("### Bias Tracking")
