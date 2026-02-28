@@ -1,0 +1,890 @@
+{
+  "model_metrics": {
+    "t+1": {
+      "mae": 4.82614513952105,
+      "rmse": 9.407430298250855,
+      "mape": 0.4587619122093218,
+      "bias_pct": 0.16375934192718733,
+      "n_train": 240881,
+      "n_val": 42509,
+      "n_features": 79
+    },
+    "t+96": {
+      "mae": 66.25164320206457,
+      "rmse": 94.32917258738696,
+      "mape": 6.199768984615924,
+      "bias_pct": 5.2425438067978645,
+      "n_train": 240800,
+      "n_val": 42495,
+      "n_features": 63
+    },
+    "t+288": {
+      "mae": 140.02009915090238,
+      "rmse": 184.9146071498782,
+      "mape": 13.00614944644986,
+      "bias_pct": 12.27676860135665,
+      "n_train": 240637,
+      "n_val": 42466,
+      "n_features": 61
+    }
+  },
+  "backtest_tiered": {
+    "total_penalty": 93806.71529760378,
+    "peak_penalty": 14981.41871169387,
+    "offpeak_penalty": 78825.2965859099,
+    "forecast_bias_pct": 0.16729267239843926,
+    "p95_abs_deviation_kw": 32.20456020821834,
+    "reliability_violations": 0,
+    "financial_cap": 50000.0,
+    "cap_compliant": false,
+    "bias_in_bounds": true,
+    "mean_abs_deviation_kw": 13.58030409868135,
+    "max_abs_deviation_kw": 50.55006987515435,
+    "mape_pct": 1.0697834956330174
+  },
+  "backtest_stage2": {
+    "total_penalty": 116463.71479834086,
+    "peak_penalty": 13001.208063167192,
+    "offpeak_penalty": 103462.50673517368,
+    "forecast_bias_pct": 0.16729267239843926,
+    "p95_abs_deviation_kw": 32.20456020821834,
+    "reliability_violations": 0,
+    "financial_cap": 50000.0,
+    "cap_compliant": false,
+    "bias_in_bounds": true,
+    "mean_abs_deviation_kw": 13.58030409868135,
+    "max_abs_deviation_kw": 50.55006987515435,
+    "mape_pct": 1.0697834956330174
+  },
+  "optimizer": {
+    "bias_offset": -0.0025125628140703488,
+    "total_penalty": 88443.48011487587
+  },
+  "mc_summary": {
+    "mean_penalty": 531962.0907741439,
+    "std_penalty": 13715.391976408468,
+    "median_penalty": 531878.5586815565,
+    "var_95": 554787.7924534662,
+    "var_99": 564504.451095458,
+    "cvar_95": 560330.8173835964,
+    "max_penalty": 578603.6354550906,
+    "min_penalty": 488888.9151380872,
+    "cap_breach_prob": 1.0,
+    "mean_violations": 172.029,
+    "mean_bias_pct": 0.007609716887583267,
+    "percentiles": {
+      "p5": 510057.1887337876,
+      "p25": 522371.83151199284,
+      "p50": 531878.5586815565,
+      "p75": 541657.6851508571,
+      "p95": 554787.7924534662
+    }
+  },
+  "scenario_results": [
+    {
+      "scenario_name": "Cyclone",
+      "penalty_rate_multiplier": 1.0,
+      "cyclone_impact_pct": 0.15,
+      "heatwave_impact_pct": 0.0,
+      "total_penalty": 1589218.181636455,
+      "peak_penalty": 335175.88571292267,
+      "offpeak_penalty": 1254042.2959235322,
+      "forecast_bias_pct": -2.7461786392234853,
+      "p95_abs_deviation_kw": 214.3146527845098,
+      "reliability_violations": 608,
+      "financial_cap": 50000.0,
+      "cap_compliant": false,
+      "bias_in_bounds": false,
+      "mean_abs_deviation_kw": 50.21068102949816,
+      "max_abs_deviation_kw": 266.82236100442674,
+      "mape_pct": 3.5214236897642395
+    },
+    {
+      "scenario_name": "Heatwave",
+      "penalty_rate_multiplier": 1.0,
+      "cyclone_impact_pct": 0.0,
+      "heatwave_impact_pct": 0.1,
+      "total_penalty": 1110091.962060672,
+      "peak_penalty": 1033950.9777646438,
+      "offpeak_penalty": 76140.98429602827,
+      "forecast_bias_pct": -1.60748232001725,
+      "p95_abs_deviation_kw": 127.83797153671112,
+      "reliability_violations": 496,
+      "financial_cap": 50000.0,
+      "cap_compliant": false,
+      "bias_in_bounds": true,
+      "mean_abs_deviation_kw": 31.752076880211828,
+      "max_abs_deviation_kw": 150.75561245707217,
+      "mape_pct": 2.3675185877030116
+    },
+    {
+      "scenario_name": "Penalty Hike \u00d71.5",
+      "penalty_rate_multiplier": 1.5,
+      "cyclone_impact_pct": 0.0,
+      "heatwave_impact_pct": 0.0,
+      "total_penalty": 132665.2201723138,
+      "peak_penalty": 18453.743728271424,
+      "offpeak_penalty": 114211.4764440424,
+      "forecast_bias_pct": -0.08438394235632615,
+      "p95_abs_deviation_kw": 32.177250379664784,
+      "reliability_violations": 0,
+      "financial_cap": 50000.0,
+      "cap_compliant": false,
+      "bias_in_bounds": true,
+      "mean_abs_deviation_kw": 13.572670434221804,
+      "max_abs_deviation_kw": 47.446995649337396,
+      "mape_pct": 1.0683515994352453
+    },
+    {
+      "scenario_name": "Extreme: Cyclone + Penalty Hike",
+      "penalty_rate_multiplier": 1.5,
+      "cyclone_impact_pct": 0.15,
+      "heatwave_impact_pct": 0.0,
+      "total_penalty": 2383827.2724546827,
+      "peak_penalty": 502763.828569384,
+      "offpeak_penalty": 1881063.4438852984,
+      "forecast_bias_pct": -2.7461786392234853,
+      "p95_abs_deviation_kw": 214.3146527845098,
+      "reliability_violations": 608,
+      "financial_cap": 50000.0,
+      "cap_compliant": false,
+      "bias_in_bounds": false,
+      "mean_abs_deviation_kw": 50.21068102949816,
+      "max_abs_deviation_kw": 266.82236100442674,
+      "mape_pct": 3.5214236897642395
+    }
+  ],
+  "strategy": {
+    "quantile_selection": {
+      "base_offpeak_tau": 0.6666666666666666,
+      "base_peak_tau": 0.75,
+      "stage2_offpeak_tau": 0.75,
+      "stage2_peak_tau": 0.8181818181818182,
+      "derivation": "\u03c4* = C_under / (C_under + C_over). Base Off-Peak: \u03c4 = 4.0/(4.0+2.0) = 0.6667. Base Peak: \u03c4 = 6.0/(6.0+2.0) = 0.7500."
+    },
+    "bias_positioning": {
+      "allowed_range": "[-2%, 3%]",
+      "optimal_bias_pct": -0.08438394235632615,
+      "rationale": "Under asymmetric penalties where Pu > Po, the optimal strategy biases forecast slightly upward (overforecast) to reduce the more expensive underforecast penalties. The optimizer found the minimum-penalty bias within the regulatory bounds."
+    },
+    "financial_exposure": {
+      "expected_penalty": 531962.0907741439,
+      "var_95": 554787.7924534662,
+      "cvar_95": 560330.8173835964,
+      "cap_breach_probability": 1.0,
+      "financial_cap": 50000.0,
+      "headroom": -504787.7924534662
+    },
+    "constraint_satisfaction": {
+      "financial_cap_met": false,
+      "reliability_met": false,
+      "bias_met": true
+    },
+    "penalty_reduction": {
+      "vs_naive_pct": 93.82566715814662,
+      "vs_rolling_pct": 97.32184488573908
+    }
+  },
+  "pareto_points": [
+    {
+      "bias_offset": -0.03,
+      "total_penalty": 520608.28410258086,
+      "reliability_violations": 68,
+      "forecast_bias_pct": -2.8377261077735167,
+      "mape_pct": 2.8528479804158535
+    },
+    {
+      "bias_offset": -0.028686868686868684,
+      "total_penalty": 484549.60240641254,
+      "reliability_violations": 37,
+      "forecast_bias_pct": -2.7061932992137954,
+      "mape_pct": 2.728203854604241
+    },
+    {
+      "bias_offset": -0.027373737373737373,
+      "total_penalty": 449130.932565995,
+      "reliability_violations": 21,
+      "forecast_bias_pct": -2.5746604906540846,
+      "mape_pct": 2.605592824635692
+    },
+    {
+      "bias_offset": -0.02606060606060606,
+      "total_penalty": 414025.7579004087,
+      "reliability_violations": 8,
+      "forecast_bias_pct": -2.4431276820943633,
+      "mape_pct": 2.4845866662791205
+    },
+    {
+      "bias_offset": -0.024747474747474747,
+      "total_penalty": 379496.139907886,
+      "reliability_violations": 4,
+      "forecast_bias_pct": -2.3115948735346525,
+      "mape_pct": 2.3652604616819675
+    },
+    {
+      "bias_offset": -0.023434343434343433,
+      "total_penalty": 346861.73363106744,
+      "reliability_violations": 1,
+      "forecast_bias_pct": -2.180062064974942,
+      "mape_pct": 2.2479211324668587
+    },
+    {
+      "bias_offset": -0.022121212121212118,
+      "total_penalty": 315234.09447273926,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -2.0485292564152204,
+      "mape_pct": 2.132909749662885
+    },
+    {
+      "bias_offset": -0.020808080808080807,
+      "total_penalty": 281925.2675697069,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.9169964478555104,
+      "mape_pct": 2.0208966806444755
+    },
+    {
+      "bias_offset": -0.019494949494949496,
+      "total_penalty": 255466.2079802989,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.7854636392957888,
+      "mape_pct": 1.9113594077109295
+    },
+    {
+      "bias_offset": -0.01818181818181818,
+      "total_penalty": 230313.5552673062,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.6539308307360783,
+      "mape_pct": 1.8047370440047756
+    },
+    {
+      "bias_offset": -0.016868686868686866,
+      "total_penalty": 207638.1820429315,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.522398022176368,
+      "mape_pct": 1.7023390684262605
+    },
+    {
+      "bias_offset": -0.015555555555555555,
+      "total_penalty": 187277.75539228565,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.3908652136166464,
+      "mape_pct": 1.605381894132506
+    },
+    {
+      "bias_offset": -0.01424242424242424,
+      "total_penalty": 167597.51203855604,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.259332405056936,
+      "mape_pct": 1.513868833029597
+    },
+    {
+      "bias_offset": -0.01292929292929293,
+      "total_penalty": 148424.59247501736,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -1.1277995964972147,
+      "mape_pct": 1.4289251897635438
+    },
+    {
+      "bias_offset": -0.011616161616161615,
+      "total_penalty": 130390.1061695307,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.9962667879375043,
+      "mape_pct": 1.3523544793402598
+    },
+    {
+      "bias_offset": -0.010303030303030303,
+      "total_penalty": 116751.47592047832,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.8647339793777827,
+      "mape_pct": 1.2845076655886971
+    },
+    {
+      "bias_offset": -0.008989898989898989,
+      "total_penalty": 106412.21244379468,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.7332011708180722,
+      "mape_pct": 1.2255445754022816
+    },
+    {
+      "bias_offset": -0.007676767676767674,
+      "total_penalty": 98107.09471564568,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.601668362258362,
+      "mape_pct": 1.1755965527234562
+    },
+    {
+      "bias_offset": -0.006363636363636363,
+      "total_penalty": 92614.9712752426,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.4701355536986404,
+      "mape_pct": 1.1351072045869903
+    },
+    {
+      "bias_offset": -0.005050505050505048,
+      "total_penalty": 89463.73732174172,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.33860274513892985,
+      "mape_pct": 1.1031675811074253
+    },
+    {
+      "bias_offset": -0.003737373737373737,
+      "total_penalty": 88583.03752836183,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.20706993657920802,
+      "mape_pct": 1.080491856230394
+    },
+    {
+      "bias_offset": -0.0024242424242424225,
+      "total_penalty": 88682.33507607273,
+      "reliability_violations": 0,
+      "forecast_bias_pct": -0.07553712801949802,
+      "mape_pct": 1.0678280054769003
+    },
+    {
+      "bias_offset": -0.0011111111111111113,
+      "total_penalty": 90910.89934080615,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.055995680540223566,
+      "mape_pct": 1.065087211954359
+    },
+    {
+      "bias_offset": 0.00020202020202020332,
+      "total_penalty": 94536.56136810679,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.18752848909994524,
+      "mape_pct": 1.0713278809540066
+    },
+    {
+      "bias_offset": 0.001515151515151518,
+      "total_penalty": 98640.27804182809,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.3190612976596445,
+      "mape_pct": 1.0859900074440554
+    },
+    {
+      "bias_offset": 0.0028282828282828326,
+      "total_penalty": 103634.09590217186,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.450594106219366,
+      "mape_pct": 1.1094571298045321
+    },
+    {
+      "bias_offset": 0.00414141414141414,
+      "total_penalty": 109200.7632789601,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.5821269147790875,
+      "mape_pct": 1.1417911039192477
+    },
+    {
+      "bias_offset": 0.005454545454545455,
+      "total_penalty": 116600.68598468041,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.7136597233387868,
+      "mape_pct": 1.1832182283871804
+    },
+    {
+      "bias_offset": 0.00676767676767677,
+      "total_penalty": 125102.3693951099,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.8451925318985082,
+      "mape_pct": 1.2348703221635484
+    },
+    {
+      "bias_offset": 0.008080808080808084,
+      "total_penalty": 135936.98307163364,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 0.9767253404582298,
+      "mape_pct": 1.2954673544711948
+    },
+    {
+      "bias_offset": 0.009393939393939392,
+      "total_penalty": 146510.47548645103,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.1082581490179289,
+      "mape_pct": 1.3653565759042305
+    },
+    {
+      "bias_offset": 0.010707070707070707,
+      "total_penalty": 158576.85503576594,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.2397909575776507,
+      "mape_pct": 1.4448113239672098
+    },
+    {
+      "bias_offset": 0.012020202020202021,
+      "total_penalty": 174757.17226336803,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.3713237661373718,
+      "mape_pct": 1.5317660485546023
+    },
+    {
+      "bias_offset": 0.013333333333333336,
+      "total_penalty": 193696.35131326487,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.5028565746970934,
+      "mape_pct": 1.6249227914954274
+    },
+    {
+      "bias_offset": 0.01464646464646465,
+      "total_penalty": 211875.5587812684,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.6343893832567926,
+      "mape_pct": 1.724352447841398
+    },
+    {
+      "bias_offset": 0.01595959595959596,
+      "total_penalty": 234614.09059605197,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.7659221918165144,
+      "mape_pct": 1.8295213568466684
+    },
+    {
+      "bias_offset": 0.017272727272727273,
+      "total_penalty": 260591.41607436424,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 1.8974550003762363,
+      "mape_pct": 1.939735422769251
+    },
+    {
+      "bias_offset": 0.018585858585858588,
+      "total_penalty": 289000.6564275618,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.028987808935935,
+      "mape_pct": 2.055800824627136
+    },
+    {
+      "bias_offset": 0.019898989898989902,
+      "total_penalty": 316470.6183263058,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.160520617495657,
+      "mape_pct": 2.1765188919533647
+    },
+    {
+      "bias_offset": 0.02121212121212121,
+      "total_penalty": 347273.91413294314,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.292053426055378,
+      "mape_pct": 2.301015978331854
+    },
+    {
+      "bias_offset": 0.022525252525252525,
+      "total_penalty": 378857.92796331795,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.4235862346151005,
+      "mape_pct": 2.428063814737648
+    },
+    {
+      "bias_offset": 0.02383838383838384,
+      "total_penalty": 409678.6790281696,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.555119043174799,
+      "mape_pct": 2.5570618109709247
+    },
+    {
+      "bias_offset": 0.025151515151515154,
+      "total_penalty": 442609.3533622386,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.6866518517345206,
+      "mape_pct": 2.6874345521159113
+    },
+    {
+      "bias_offset": 0.02646464646464647,
+      "total_penalty": 478601.9345471215,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.818184660294242,
+      "mape_pct": 2.818444180616498
+    },
+    {
+      "bias_offset": 0.027777777777777776,
+      "total_penalty": 515657.4614223979,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 2.949717468853941,
+      "mape_pct": 2.949805436873388
+    },
+    {
+      "bias_offset": 0.02909090909090909,
+      "total_penalty": 550545.0407414795,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.081250277413663,
+      "mape_pct": 3.0812525236777133
+    },
+    {
+      "bias_offset": 0.030404040404040406,
+      "total_penalty": 587267.840046841,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.2127830859733844,
+      "mape_pct": 3.2127830859733844
+    },
+    {
+      "bias_offset": 0.03171717171717172,
+      "total_penalty": 625467.4929396277,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.3443158945331057,
+      "mape_pct": 3.3443158945331057
+    },
+    {
+      "bias_offset": 0.033030303030303035,
+      "total_penalty": 665348.8119498878,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.475848703092806,
+      "mape_pct": 3.475848703092806
+    },
+    {
+      "bias_offset": 0.03434343434343434,
+      "total_penalty": 709230.4395116594,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.607381511652527,
+      "mape_pct": 3.607381511652527
+    },
+    {
+      "bias_offset": 0.035656565656565664,
+      "total_penalty": 755411.8990368416,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.7389143202122486,
+      "mape_pct": 3.7389143202122486
+    },
+    {
+      "bias_offset": 0.03696969696969697,
+      "total_penalty": 799688.3507878609,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 3.8704471287719477,
+      "mape_pct": 3.8704471287719477
+    },
+    {
+      "bias_offset": 0.03828282828282828,
+      "total_penalty": 847082.3487632617,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.00197993733167,
+      "mape_pct": 4.00197993733167
+    },
+    {
+      "bias_offset": 0.0395959595959596,
+      "total_penalty": 902935.7094937293,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.133512745891391,
+      "mape_pct": 4.133512745891391
+    },
+    {
+      "bias_offset": 0.04090909090909091,
+      "total_penalty": 950445.8869851688,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.265045554451112,
+      "mape_pct": 4.265045554451112
+    },
+    {
+      "bias_offset": 0.04222222222222222,
+      "total_penalty": 999434.0052842296,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.3965783630108115,
+      "mape_pct": 4.3965783630108115
+    },
+    {
+      "bias_offset": 0.04353535353535354,
+      "total_penalty": 1044181.7803351197,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.528111171570534,
+      "mape_pct": 4.528111171570534
+    },
+    {
+      "bias_offset": 0.044848484848484846,
+      "total_penalty": 1095445.4866708918,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.659643980130255,
+      "mape_pct": 4.659643980130255
+    },
+    {
+      "bias_offset": 0.04616161616161617,
+      "total_penalty": 1150066.2878929083,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.7911767886899534,
+      "mape_pct": 4.7911767886899534
+    },
+    {
+      "bias_offset": 0.047474747474747475,
+      "total_penalty": 1202580.8775572497,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 4.922709597249675,
+      "mape_pct": 4.922709597249675
+    },
+    {
+      "bias_offset": 0.04878787878787878,
+      "total_penalty": 1259689.274576961,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.054242405809396,
+      "mape_pct": 5.054242405809396
+    },
+    {
+      "bias_offset": 0.050101010101010104,
+      "total_penalty": 1311944.1685585924,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.185775214369119,
+      "mape_pct": 5.185775214369119
+    },
+    {
+      "bias_offset": 0.05141414141414141,
+      "total_penalty": 1379222.4130059588,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.3173080229288185,
+      "mape_pct": 5.3173080229288185
+    },
+    {
+      "bias_offset": 0.052727272727272734,
+      "total_penalty": 1449797.5350593617,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.448840831488539,
+      "mape_pct": 5.448840831488539
+    },
+    {
+      "bias_offset": 0.05404040404040404,
+      "total_penalty": 1514389.8712636135,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.580373640048262,
+      "mape_pct": 5.580373640048262
+    },
+    {
+      "bias_offset": 0.05535353535353535,
+      "total_penalty": 1589047.3075385266,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.7119064486079605,
+      "mape_pct": 5.7119064486079605
+    },
+    {
+      "bias_offset": 0.05666666666666667,
+      "total_penalty": 1673486.1540326546,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.843439257167682,
+      "mape_pct": 5.843439257167682
+    },
+    {
+      "bias_offset": 0.05797979797979798,
+      "total_penalty": 1763867.9166081604,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 5.974972065727403,
+      "mape_pct": 5.974972065727403
+    },
+    {
+      "bias_offset": 0.0592929292929293,
+      "total_penalty": 1845899.5795711293,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.106504874287125,
+      "mape_pct": 6.106504874287125
+    },
+    {
+      "bias_offset": 0.06060606060606061,
+      "total_penalty": 1938531.7433650522,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.238037682846823,
+      "mape_pct": 6.238037682846823
+    },
+    {
+      "bias_offset": 0.061919191919191915,
+      "total_penalty": 2023744.5114845813,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.369570491406547,
+      "mape_pct": 6.369570491406547
+    },
+    {
+      "bias_offset": 0.06323232323232324,
+      "total_penalty": 2116856.65105769,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.501103299966268,
+      "mape_pct": 6.501103299966268
+    },
+    {
+      "bias_offset": 0.06454545454545454,
+      "total_penalty": 2205877.187012869,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.632636108525966,
+      "mape_pct": 6.632636108525966
+    },
+    {
+      "bias_offset": 0.06585858585858587,
+      "total_penalty": 2306688.283271499,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.764168917085687,
+      "mape_pct": 6.764168917085687
+    },
+    {
+      "bias_offset": 0.06717171717171717,
+      "total_penalty": 2408572.0368568124,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 6.895701725645409,
+      "mape_pct": 6.895701725645409
+    },
+    {
+      "bias_offset": 0.06848484848484848,
+      "total_penalty": 2505965.4244329394,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.0272345342051095,
+      "mape_pct": 7.0272345342051095
+    },
+    {
+      "bias_offset": 0.0697979797979798,
+      "total_penalty": 2602772.9941399405,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.158767342764831,
+      "mape_pct": 7.158767342764831
+    },
+    {
+      "bias_offset": 0.07111111111111111,
+      "total_penalty": 2693921.34244047,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.290300151324552,
+      "mape_pct": 7.290300151324552
+    },
+    {
+      "bias_offset": 0.07242424242424242,
+      "total_penalty": 2795500.269644441,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.421832959884274,
+      "mape_pct": 7.421832959884274
+    },
+    {
+      "bias_offset": 0.07373737373737374,
+      "total_penalty": 2890639.1277251504,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.553365768443972,
+      "mape_pct": 7.553365768443972
+    },
+    {
+      "bias_offset": 0.07505050505050505,
+      "total_penalty": 2989699.0636270507,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.684898577003694,
+      "mape_pct": 7.684898577003694
+    },
+    {
+      "bias_offset": 0.07636363636363637,
+      "total_penalty": 3100730.8426517346,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.8164313855634155,
+      "mape_pct": 7.8164313855634155
+    },
+    {
+      "bias_offset": 0.07767676767676768,
+      "total_penalty": 3197864.7862127605,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 7.947964194123138,
+      "mape_pct": 7.947964194123138
+    },
+    {
+      "bias_offset": 0.07898989898989899,
+      "total_penalty": 3301129.501954209,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.079497002682835,
+      "mape_pct": 8.079497002682835
+    },
+    {
+      "bias_offset": 0.0803030303030303,
+      "total_penalty": 3416827.5810288116,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.211029811242557,
+      "mape_pct": 8.211029811242557
+    },
+    {
+      "bias_offset": 0.08161616161616161,
+      "total_penalty": 3509561.2990121627,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.342562619802278,
+      "mape_pct": 8.342562619802278
+    },
+    {
+      "bias_offset": 0.08292929292929294,
+      "total_penalty": 3604943.3349333797,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.474095428361979,
+      "mape_pct": 8.474095428361979
+    },
+    {
+      "bias_offset": 0.08424242424242424,
+      "total_penalty": 3694397.802842363,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.6056282369217,
+      "mape_pct": 8.6056282369217
+    },
+    {
+      "bias_offset": 0.08555555555555555,
+      "total_penalty": 3783293.0737422574,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.737161045481423,
+      "mape_pct": 8.737161045481423
+    },
+    {
+      "bias_offset": 0.08686868686868687,
+      "total_penalty": 3870890.7489416115,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 8.86869385404112,
+      "mape_pct": 8.86869385404112
+    },
+    {
+      "bias_offset": 0.08818181818181818,
+      "total_penalty": 3959237.974852229,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.000226662600843,
+      "mape_pct": 9.000226662600843
+    },
+    {
+      "bias_offset": 0.0894949494949495,
+      "total_penalty": 4051407.24437994,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.131759471160564,
+      "mape_pct": 9.131759471160564
+    },
+    {
+      "bias_offset": 0.09080808080808081,
+      "total_penalty": 4136825.1602550903,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.263292279720286,
+      "mape_pct": 9.263292279720286
+    },
+    {
+      "bias_offset": 0.09212121212121212,
+      "total_penalty": 4221925.872948066,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.394825088279985,
+      "mape_pct": 9.394825088279985
+    },
+    {
+      "bias_offset": 0.09343434343434344,
+      "total_penalty": 4293233.786225763,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.52635789683971,
+      "mape_pct": 9.52635789683971
+    },
+    {
+      "bias_offset": 0.09474747474747475,
+      "total_penalty": 4364846.045296218,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.657890705399428,
+      "mape_pct": 9.657890705399428
+    },
+    {
+      "bias_offset": 0.09606060606060607,
+      "total_penalty": 4433634.287502317,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.789423513959147,
+      "mape_pct": 9.789423513959147
+    },
+    {
+      "bias_offset": 0.09737373737373736,
+      "total_penalty": 4499329.436058426,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 9.920956322518848,
+      "mape_pct": 9.920956322518848
+    },
+    {
+      "bias_offset": 0.09868686868686868,
+      "total_penalty": 4561457.277728122,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 10.052489131078572,
+      "mape_pct": 10.052489131078572
+    },
+    {
+      "bias_offset": 0.1,
+      "total_penalty": 4621864.68853098,
+      "reliability_violations": 0,
+      "forecast_bias_pct": 10.184021939638292,
+      "mape_pct": 10.184021939638292
+    }
+  ]
+}

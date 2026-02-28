@@ -1,0 +1,150 @@
+DECODE X | 2026  
+02  Case GRIDSHIELD   
+          Page  1 | 7 
+NLD Synapse 2026 | N. L. Dalmia Institute of Management Studies & Research.  
+ Stage 1  Baseline Diagnostic & Cost-Aware Forecasting   
+ 28 February 2026 | 11:00 AM   
+1. Executive Context    
+Lumina Energy operates a suburban Mumbai distribution zone.   
+Under Maharashtras  Availability Based Tari  (ABT) regulations, Power Distribution Companies 
+must submit a  2-day ahead load forecast at 15-minute resolution  to the State Load Dispatch 
+Centre (SLDC).   
+Deviation from submitted schedules attracts nancial penalties.   
+Under ABT:   
+ Under-forecasting (Actual > Forecast)  costly grid drawal   
+ Over-forecasting (Forecast > Actual)  ine iciency + deviation charge   
+ Penalties are asymmetric   
+ Peak-hour deviations carry higher nancial and operational risk   
+Forecast accuracy is no longer a statistical objective.   
+It is a nancial exposure minimization problem under regulatory constraint .  
+You are engaged as the  Forecast Risk Advisory Team .  
+ 
+2. Regulatory Simulation Framework    
+For Stage 1 simulation, assume:   
+Base Deviation Penalty Structure   
+Condition  Penalty 
+Actual > Forecast   4 per kWh deviation  
+Forecast > Actual   2 per kWh deviation  
+  
+Peak Hour Denition   
+Peak Hours:  6:00 PM  10:00 PM (local time)   
+Peak deviations carry elevated system risk but follow base penalty rates in Stage 1.   
+  
+  
+ 
+ 
+
+DECODE X | 2026  
+02  Case GRIDSHIELD   
+          Page  2 | 7 
+NLD Synapse 2026 | N. L. Dalmia Institute of Management Studies & Research.  
+ 3. Data Provided    
+A. Electric Load Data   
+ DateTime (15-minute intervals)   
+ Load (kW)   
+ Period: 1 April 2013  30 April 2021 (Training)   
+B. Weather Variables (15-minute aligned)   
+ Temperature   
+ Heat Index   
+ Humidity   
+ Rainfall  
+ Cool Factor   
+C. Event Data   
+ Date  
+ Event Name   
+ Holiday Indicator   
+ Remarks   
+Historical data includes structural disruptions.   
+Full stationarity should not be assumed.   
+External augmentation is permitted but must be documented.   
+  
+4. Advisory Mandate    
+You must:   
+1. Develop a  2-day ahead load forecasting model  (15-min resolution).   
+2. Incorporate relevant exogenous drivers.   
+3. Quantify forecast uncertainty (intervals or quantiles).   
+4. Backtest historical deviation penalty exposure.   
+5. Propose a cost-minimizing forecast strategy.   
+Forecasting must minimize  expected nancial penalty , not merely RMSE.   
+  
+
+DECODE X | 2026  
+02  Case GRIDSHIELD   
+          Page  3 | 7 
+NLD Synapse 2026 | N. L. Dalmia Institute of Management Studies & Research.  
+  
+ 5. Mandatory Outputs    
+A. Forecast Model Documentation   
+ Modeling approach   
+ Feature engineering logic   
+ Handling of seasonality and structural breaks   
+ Time-aware validation methodology   
+ Leakage controls   
+B. Historical Backtest Metrics   
+Report on Training period:   
+ Total deviation penalty ()   
+ Peak-hour penalty ()   
+ O-peak penalty ()   
+ Forecast bias (%)   
+ 95th percentile absolute deviation (kW)   
+C. Risk Strategy Proposal   
+ Bias positioning (if any)   
+ Quantile or bu ering approach   
+ Peak-hour risk mitigation strategy   
+ Expected penalty reduction vs naive baseline   
+Only genuine data inconsistencies may be raised.   
+  
+
+DECODE X | 2026  
+02  Case GRIDSHIELD   
+          Page  4 | 7 
+NLD Synapse 2026 | N. L. Dalmia Institute of Management Studies & Research.  
+ Stage 2  Regime Shift & Penalty Escalation   
+ 28 February 2026 | 7:00 PM   
+1. Data Release   
+Dataset now available:   Test Set (Out-of-Time )   
+This dataset represents out-of-time load behaviour characterized by:   
+ Elevated volatility   
+ Increased intra-day uctuation   
+ Altered weekday/weekend elasticity   
+ Amplied peak-hour variability   
+This period was not included in training.   
+2. Regulatory Update  Peak Sensitivity Escalation   
+Eective immediately:   
+Revised Peak-Hour Penalty (6:00 PM  10:00 PM)   
+Condition  Penalty 
+Actual > Forecast  6 per kWh deviation  
+Forecast > Actual  2 per kWh deviation  
+O-peak penalties remain unchanged.   
+Underestimation during peak hours now carries materially higher nancial exposure.   
+3. Revised Analytical Requirements   
+You must:   
+1. Generate forecasts for Test dataset.   
+2. Compute deviation penalties under revised structure.   
+3. Quantify:   
+ Total penalty ()   
+ Peak-hour penalty ()   
+ O-peak penalty ()   
+ Forecast bias (%)   
+ 95th percentile absolute deviation (kW)   
+4. Compare:   
+ Stage 1 historical penalty exposure   
+ Stage 2 test penalty exposure   
+5. Recalibrate forecasting and bu ering strategy if necessary.   
+ 
+ 
+ 
+
+DECODE X | 2026  
+02  Case GRIDSHIELD   
+          Page  5 | 7 
+NLD Synapse 2026 | N. L. Dalmia Institute of Management Studies & Research.  
+ 4. Modeling Discipline   
+You must:   
+ Avoid temporal leakage.   
+ Ensure weather variables reect available forecast horizon.   
+ Document structural adjustments.   
+ Justify any bias or quantile modications introduced post-update.   
+No regulatory clarications will be provided.  
+  
+  
