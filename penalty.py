@@ -9,7 +9,7 @@ from config import (
     PENALTY_UNDER_BASE, PENALTY_OVER_BASE, PENALTY_UNDER_STAGE2,
     TIERED_PENALTIES, PEAK_UNDER_MULTIPLIER,
     PEAK_START_HOUR, PEAK_END_HOUR,
-    FINANCIAL_CAP, MAX_RELIABILITY_VIOLATIONS,
+    MAX_RELIABILITY_VIOLATIONS,
     UNDERESTIMATION_THRESHOLD, BIAS_LOWER_BOUND, BIAS_UPPER_BOUND,
 )
 
@@ -120,8 +120,7 @@ def compute_full_penalty(forecast: np.ndarray, actual: np.ndarray,
                          is_peak: np.ndarray,
                          regime: str = "tiered") -> np.ndarray:
     """
-    Compute penalty vector using the specified regime.
-    regime: 'linear', 'tiered', 'stage2_shock'
+    Compute per-interval penalty.
     """
     deviation = compute_deviation(forecast, actual)
     if regime == "linear":
@@ -134,10 +133,51 @@ def compute_full_penalty(forecast: np.ndarray, actual: np.ndarray,
         raise ValueError(f"Unknown penalty regime: {regime}")
 
 
+def compute_decomposed_penalty(forecast: np.ndarray, actual: np.ndarray,
+                               is_peak: np.ndarray,
+                               regime: str = "tiered") -> tuple[float, float, float]:
+    """
+    Returns (linear_penalty, tier_jump_penalty, total_penalty).
+    The linear_penalty is what the penalty WOULD be if the base linear rates were used.
+    The tier_jump_penalty is the extra penalty incurred due to convex jumps.
+    """
+    from config import TIERED_PENALTIES, PEAK_UNDER_MULTIPLIER
+    deviation = compute_deviation(forecast, actual)
+    
+    # Base rate for decomposition is the FIRST TIER (lowest rate)
+    first_tier_rate = TIERED_PENALTIES[0][1]
+    linear_penalties = np.abs(deviation) * first_tier_rate
+    
+    # Apply peak multiplier if applicable to base decomposition too
+    peak_under = (deviation < 0) & (is_peak == 1)
+    linear_penalties[peak_under] *= PEAK_UNDER_MULTIPLIER
+    
+    base_penalty_sum = linear_penalties.sum()
+    base_penalty_sum = linear_penalties.sum()
+    
+    # Actual selected regime
+    if regime == "linear":
+        total_penalties = linear_penalties
+    elif regime == "tiered":
+        total_penalties = tiered_penalty(deviation, actual, is_peak)
+    elif regime == "stage2_shock":
+        total_penalties = stage2_shock_penalty(deviation, actual, is_peak)
+    else:
+        raise ValueError(f"Unknown penalty regime: {regime}")
+        
+    total_penalty_sum = total_penalties.sum()
+    tier_jump_penalty = total_penalty_sum - base_penalty_sum
+    
+    # Floor at 0 just in case regimes are cheaper than linear (though mathematically impossible here)
+    tier_jump_penalty = max(0, tier_jump_penalty)
+    
+    return base_penalty_sum, tier_jump_penalty, total_penalty_sum
+
+
 def compute_penalty_summary(forecast: np.ndarray, actual: np.ndarray,
                             is_peak: np.ndarray,
-                            regime: str = "tiered",
-                            financial_cap: float = FINANCIAL_CAP) -> dict:
+                            financial_cap: float,
+                            regime: str = "tiered") -> dict:
     """
     Compute comprehensive penalty summary for the backtest.
     Returns dict with all mandatory metrics.
@@ -173,12 +213,12 @@ def compute_penalty_summary(forecast: np.ndarray, actual: np.ndarray,
 
 
 def compute_naive_penalty(actual: np.ndarray, is_peak: np.ndarray,
-                          regime: str = "tiered",
-                          financial_cap: float = FINANCIAL_CAP) -> dict:
+                          financial_cap: float,
+                          regime: str = "tiered") -> dict:
     """
     Compute penalty for naive baseline (previous-day same-time forecast).
     Uses lag-96 as the naive forecast.
     """
     naive_forecast = np.roll(actual, 96)
     naive_forecast[:96] = actual[:96]  # fill first day
-    return compute_penalty_summary(naive_forecast, actual, is_peak, regime, financial_cap=financial_cap)
+    return compute_penalty_summary(naive_forecast, actual, is_peak, financial_cap, regime)

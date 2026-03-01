@@ -41,18 +41,18 @@
     "peak_pct": 16.661068189452468,
     "n_features": 81,
     "metrics": {
-      "total_penalty": 85610.4177141608,
-      "peak_penalty": 12181.351765551724,
+      "total_penalty": 84920.33263483518,
+      "peak_penalty": 11491.266686226116,
       "offpeak_penalty": 73429.06594860906,
-      "forecast_bias_pct": -0.08165286425259065,
-      "p95_abs_deviation_kw": 31.177505808863952,
+      "forecast_bias_pct": -0.1570957614393183,
+      "p95_abs_deviation_kw": 30.384386135464318,
       "reliability_violations": 0,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": true,
-      "mean_abs_deviation_kw": 13.364078496994635,
+      "mean_abs_deviation_kw": 13.205075144208346,
       "max_abs_deviation_kw": 45.963615444541574,
-      "mape_pct": 1.048375125434003
+      "mape_pct": 1.035660120295522
     }
   }
 }

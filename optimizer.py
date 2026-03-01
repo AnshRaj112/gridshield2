@@ -8,7 +8,7 @@ import pandas as pd
 from scipy.optimize import minimize_scalar, minimize
 from typing import Tuple
 from config import (
-    FINANCIAL_CAP, MAX_RELIABILITY_VIOLATIONS,
+    MAX_RELIABILITY_VIOLATIONS,
     UNDERESTIMATION_THRESHOLD, BIAS_LOWER_BOUND, BIAS_UPPER_BOUND,
     PENALTY_UNDER_BASE, PENALTY_OVER_BASE, PEAK_UNDER_MULTIPLIER,
 )
@@ -22,10 +22,10 @@ def find_optimal_bias(
     base_forecast: np.ndarray,
     actual: np.ndarray,
     is_peak: np.ndarray,
+    financial_cap: float,
     regime: str = "tiered",
     bias_range: Tuple[float, float] = (-0.05, 0.10),
     n_points: int = 200,
-    financial_cap: float = FINANCIAL_CAP,
 ) -> dict:
     """
     Grid search for the optimal constant bias offset b*
@@ -42,7 +42,7 @@ def find_optimal_bias(
     for b in np.linspace(bias_range[0], bias_range[1], n_points):
         adjusted = base_forecast * (1 + b)
 
-        summary = compute_penalty_summary(adjusted, actual, is_peak, regime, financial_cap)
+        summary = compute_penalty_summary(adjusted, actual, is_peak, financial_cap, regime)
 
         # Check constraints
         cap_ok = summary["total_penalty"] <= financial_cap
@@ -81,8 +81,8 @@ def optimize_quantile_buffer(
     base_forecast: np.ndarray,
     actual: np.ndarray,
     is_peak: np.ndarray,
+    financial_cap: float,
     regime: str = "tiered",
-    financial_cap: float = FINANCIAL_CAP,
 ) -> dict:
     """
     Constrained optimization under binding Board-Level Directives:
@@ -110,11 +110,11 @@ def optimize_quantile_buffer(
             adjusted[peak_mask] *= (1 + b_peak)
             adjusted[~peak_mask] *= (1 + b_offpeak)
 
-            summary = compute_penalty_summary(adjusted, actual, is_peak, regime, financial_cap)
+            summary = compute_penalty_summary(adjusted, actual, is_peak, financial_cap, regime)
             
             # Fast Monte Carlo to evaluate VaR (fewer paths for speed during grid search)
             fast_mc = monte_carlo_penalty_simulation(
-                adjusted, actual, is_peak, regime, n_simulations=100, financial_cap=financial_cap
+                adjusted, actual, is_peak, financial_cap, regime, n_simulations=100
             )
 
             expected_penalty = summary["total_penalty"]
@@ -153,6 +153,17 @@ def optimize_quantile_buffer(
                 penalty_score += uplift_breach * 5000000
                 constraint_violations += 1
 
+            # Tier 3 Intervals Soft Constraint (<= 15%)
+            if regime in ["tiered", "stage2_shock"]:
+                # Calculate percentage deviation for each interval
+                # Avoid division by zero for actual values
+                adj_pct_dev = np.abs((adjusted - actual) / np.where(actual == 0, 1, actual))
+                tier3_mask = adj_pct_dev > 0.10 # 10% deviation threshold for Tier 3
+                tier3_proportion = np.mean(tier3_mask)
+                if tier3_proportion > 0.15: # 15% maximum proportion of Tier 3 intervals
+                    penalty_score += (tier3_proportion - 0.15) * 1000000
+                    constraint_violations += 1 # Consider this a constraint violation
+
             if penalty_score < best_score:
                 best_score = penalty_score
                 is_feasible = (constraint_violations == 0)
@@ -182,9 +193,9 @@ def compute_risk_transparency_outputs(
     base_forecast: np.ndarray,
     actual: np.ndarray,
     is_peak: np.ndarray,
+    financial_cap: float,
     timestamps: pd.DatetimeIndex = None,
     regime: str = "tiered",
-    financial_cap: float = FINANCIAL_CAP,
 ) -> dict:
     """
     Stage 3 Mandatory Risk Transparency Reporting:
@@ -195,12 +206,13 @@ def compute_risk_transparency_outputs(
     - Worst 5 deviation intervals
     - Financial impact of peak-hour volatility
     """
-    summary = compute_penalty_summary(base_forecast, actual, is_peak, regime, financial_cap)
+    summary = compute_penalty_summary(base_forecast, actual, is_peak, financial_cap, regime)
 
     act_safe = np.where(actual == 0, np.nan, actual)
     abs_dev = np.abs((base_forecast - actual) / act_safe) * 100  # in %
 
-    p95_dev = float(np.nanpercentile(abs_dev, 95))
+    p95_dev_pct = float(np.nanpercentile(abs_dev, 95))
+    p95_dev_kw = float(np.percentile(np.abs(base_forecast - actual), 95))
     
     interval_penalties = compute_full_penalty(base_forecast, actual, is_peak, regime=regime)
 
@@ -230,9 +242,12 @@ def compute_risk_transparency_outputs(
         "total_penalty":              summary["total_penalty"],
         "peak_penalty":               summary.get("peak_penalty", 0),
         "offpeak_penalty":            summary.get("offpeak_penalty", 0),
-        "p95_abs_dev_pct":            p95_dev,
+        "p95_abs_dev_pct":            p95_dev_pct,
+        "p95_abs_deviation_kw":       p95_dev_kw,
         "worst5_intervals":           worst5,
+        "worst_5_intervals":          worst5,
         "peak_vol_financial_impact":  peak_vol_impact,
+        "peak_volatility_financial_impact": peak_vol_impact,
         "reliability_violations":     summary["reliability_violations"],
         "mape_pct":                   summary.get("mape_pct", 0),
         "forecast_bias_pct":          summary.get("forecast_bias_pct", 0),
@@ -243,9 +258,9 @@ def pareto_frontier(
     base_forecast: np.ndarray,
     actual: np.ndarray,
     is_peak: np.ndarray,
+    financial_cap: float,
     regime: str = "tiered",
     n_points: int = 100,
-    financial_cap: float = FINANCIAL_CAP,
 ) -> list:
     """
     Generate Pareto frontier: penalty vs reliability violations.
@@ -256,7 +271,7 @@ def pareto_frontier(
 
     for b in np.linspace(-0.03, 0.10, n_points):
         adjusted = base_forecast * (1 + b)
-        summary = compute_penalty_summary(adjusted, actual, is_peak, regime, financial_cap)
+        summary = compute_penalty_summary(adjusted, actual, is_peak, financial_cap, regime)
         points.append({
             "bias_offset": b,
             "total_penalty": summary["total_penalty"],

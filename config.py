@@ -54,7 +54,6 @@ QUANTILE_PEAK = compute_quantile(PENALTY_UNDER_PEAK, PENALTY_OVER_BASE)     # 6/
 PEAK_UNDER_MULTIPLIER = PENALTY_UNDER_PEAK / PENALTY_UNDER_BASE  # 6/4 = 1.5
 
 # ─── Stage 3 Binding Constraints ─────────────────────────────────────────────
-FINANCIAL_CAP = 50000.0         # ₹ total penalty cap
 MAX_RELIABILITY_VIOLATIONS = 3  # max intervals with >5% underestimation
 UNDERESTIMATION_THRESHOLD = 0.05  # 5% threshold for reliability check
 BIAS_LOWER_BOUND = -0.02       # -2%

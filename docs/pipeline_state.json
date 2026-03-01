@@ -60,31 +60,25 @@
     "mape_pct": 1.0767553577818607
   },
   "optimizer": {
-    "peak_buffer": -0.005172413793103445,
+    "peak_buffer": -0.0096551724137931,
     "offpeak_buffer": -0.0024137931034482717,
-    "total_penalty": 85610.4177141608
+    "total_penalty": 84920.33263483518
   },
   "mc_summary": {
-    "mean_penalty": 528957.106350538,
-    "std_penalty": 13590.602632066966,
-    "median_penalty": 529438.2349043208,
-    "var_95": 552032.6713399728,
-    "var_99": 562274.5981516454,
-    "cvar_95": 557213.9169013512,
-    "var_95_cap_utilization_pct": 1104.0653426799456,
-    "cvar_95_cap_utilization_pct": 1114.4278338027023,
-    "max_penalty": 571275.6858182526,
-    "min_penalty": 487134.05416995194,
+    "mean_penalty": 84520.04056464028,
+    "var_95": 86822.89898555061,
+    "cvar_95": 87430.35764718735,
+    "linear_mean": 128656.77055687667,
+    "linear_var_95": 131489.93031786423,
+    "linear_cvar_95": 132205.57114011564,
+    "jump_mean": 0.0,
+    "jump_var_95": 0.0,
+    "jump_cvar_95": 0.0,
+    "var_95_cap_utilization_pct": 173.64579797110122,
+    "cvar_95_cap_utilization_pct": 174.8607152943747,
     "cap_breach_prob": 1.0,
-    "mean_violations": 16.606,
-    "mean_bias_pct": 0.01034003275155747,
-    "percentiles": {
-      "p5": 506918.0367293666,
-      "p25": 519613.6138300855,
-      "p50": 529438.2349043208,
-      "p75": 538374.2911610848,
-      "p95": 552032.6713399728
-    }
+    "mean_violations": 0.0,
+    "mean_bias_pct": -0.17348626019761212
   },
   "scenario_results": [
     {
@@ -92,72 +86,72 @@
       "penalty_rate_multiplier": 1.0,
       "cyclone_impact_pct": 0.15,
       "heatwave_impact_pct": 0.0,
-      "total_penalty": 1589752.3824836258,
-      "peak_penalty": 337385.8293960367,
+      "total_penalty": 1599421.045207196,
+      "peak_penalty": 347054.49211960676,
       "offpeak_penalty": 1252366.5530875893,
-      "forecast_bias_pct": -2.7429437465428403,
-      "p95_abs_deviation_kw": 212.75529678986018,
+      "forecast_bias_pct": -2.81640302419833,
+      "p95_abs_deviation_kw": 214.92294717579554,
       "reliability_violations": 100,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": false,
-      "mean_abs_deviation_kw": 50.117088403425726,
+      "mean_abs_deviation_kw": 50.16486119033709,
       "max_abs_deviation_kw": 262.8744870066903,
-      "mape_pct": 3.5113368096314392
+      "mape_pct": 3.513291425704495
     },
     {
       "scenario_name": "Heatwave",
       "penalty_rate_multiplier": 1.0,
       "cyclone_impact_pct": 0.0,
       "heatwave_impact_pct": 0.1,
-      "total_penalty": 1113611.2568378025,
-      "peak_penalty": 1040182.1908891932,
+      "total_penalty": 1179478.52934556,
+      "peak_penalty": 1106049.4633969509,
       "offpeak_penalty": 73429.06594860906,
-      "forecast_bias_pct": -1.6037001256771206,
-      "p95_abs_deviation_kw": 128.80654586233723,
+      "forecast_bias_pct": -1.6722845776650552,
+      "p95_abs_deviation_kw": 134.68546762825346,
       "reliability_violations": 496,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": true,
-      "mean_abs_deviation_kw": 31.640553176697527,
-      "max_abs_deviation_kw": 154.60343317353613,
-      "mape_pct": 2.3535565282352366
+      "mean_abs_deviation_kw": 32.589208807702825,
+      "max_abs_deviation_kw": 160.60793041150646,
+      "mape_pct": 2.422140980223171
     },
     {
       "scenario_name": "Penalty Hike \u00d71.5",
       "penalty_rate_multiplier": 1.5,
       "cyclone_impact_pct": 0.0,
       "heatwave_impact_pct": 0.0,
-      "total_penalty": 128415.62657124118,
-      "peak_penalty": 18272.02764832759,
+      "total_penalty": 127380.49895225278,
+      "peak_penalty": 17236.900029339173,
       "offpeak_penalty": 110143.59892291359,
-      "forecast_bias_pct": -0.08165286425259065,
-      "p95_abs_deviation_kw": 31.177505808863952,
+      "forecast_bias_pct": -0.1570957614393183,
+      "p95_abs_deviation_kw": 30.384386135464318,
       "reliability_violations": 0,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": true,
-      "mean_abs_deviation_kw": 13.364078496994635,
+      "mean_abs_deviation_kw": 13.205075144208346,
       "max_abs_deviation_kw": 45.963615444541574,
-      "mape_pct": 1.048375125434003
+      "mape_pct": 1.035660120295522
     },
     {
       "scenario_name": "Extreme: Cyclone + Penalty Hike",
       "penalty_rate_multiplier": 1.5,
       "cyclone_impact_pct": 0.15,
       "heatwave_impact_pct": 0.0,
-      "total_penalty": 2384628.5737254387,
-      "peak_penalty": 506078.74409405503,
+      "total_penalty": 2399131.567810794,
+      "peak_penalty": 520581.7381794101,
       "offpeak_penalty": 1878549.829631384,
-      "forecast_bias_pct": -2.7429437465428403,
-      "p95_abs_deviation_kw": 212.75529678986018,
+      "forecast_bias_pct": -2.81640302419833,
+      "p95_abs_deviation_kw": 214.92294717579554,
       "reliability_violations": 100,
       "financial_cap": 50000.0,
       "cap_compliant": false,
       "bias_in_bounds": false,
-      "mean_abs_deviation_kw": 50.117088403425726,
+      "mean_abs_deviation_kw": 50.16486119033709,
       "max_abs_deviation_kw": 262.8744870066903,
-      "mape_pct": 3.5113368096314392
+      "mape_pct": 3.513291425704495
     }
   ],
   "strategy": {
@@ -170,27 +164,38 @@
     },
     "bias_positioning": {
       "allowed_range": "[-2%, 3%]",
-      "optimal_bias_pct": -0.08165286425259065,
+      "optimal_bias_pct": -0.1570957614393183,
       "rationale": "Under asymmetric penalties where Pu > Po, the optimal strategy biases forecast slightly upward (overforecast) to reduce the more expensive underforecast penalties. The optimizer found the minimum-penalty bias within the regulatory bounds."
     },
     "financial_exposure": {
-      "expected_penalty": 528957.106350538,
-      "var_95": 552032.6713399728,
-      "cvar_95": 557213.9169013512,
+      "expected_penalty": 84520.04056464028,
+      "var_95": 86822.89898555061,
+      "cvar_95": 87430.35764718735,
+      "linear_expected": 128656.77055687667,
+      "linear_var_95": 131489.93031786423,
+      "linear_cvar_95": 132205.57114011564,
+      "jump_expected": 0.0,
+      "jump_var_95": 0.0,
+      "jump_cvar_95": 0.0,
       "cap_breach_probability": 1.0,
       "financial_cap": 50000.0,
-      "headroom": -502032.67133997276,
+      "headroom": -36822.89898555061,
       "minimum_required_cap": 89166.34926657694,
       "is_feasible": false
     },
     "constraint_satisfaction": {
       "financial_cap_met": false,
-      "reliability_met": false,
+      "reliability_met": true,
       "bias_met": true
     },
     "penalty_reduction": {
       "vs_naive_pct": 93.8956126411213,
       "vs_rolling_pct": 97.35218417222495
+    },
+    "tail_metrics": {
+      "convexity_amplification_ratio": 0.0,
+      "tail_dominance_index": 1.0344334558183428,
+      "is_convex_regime_risk": false
     }
   },
   "pareto_points": [
@@ -896,20 +901,12 @@
     }
   ],
   "risk_transparency": {
-    "total_penalty": 85610.4177141608,
-    "peak_penalty": 12181.351765551724,
+    "total_penalty": 84920.33263483518,
+    "peak_penalty": 11491.266686226116,
     "offpeak_penalty": 73429.06594860906,
-    "p95_abs_dev_pct": 2.3954228288056623,
+    "p95_abs_dev_pct": 2.348362317360567,
+    "p95_abs_deviation_kw": 30.384386135464318,
     "worst5_intervals": [
-      {
-        "interval": 2862,
-        "timestamp": "2021-05-30 19:30:00",
-        "abs_dev_pct": 3.6283769788210205,
-        "forecast": 1216.7323849084512,
-        "actual": 1174.130504,
-        "is_peak": true,
-        "penalty_impact": 255.61128545070733
-      },
       {
         "interval": 2917,
         "timestamp": "2021-05-31 09:15:00",
@@ -938,18 +935,75 @@
         "penalty_impact": 262.2485855965265
       },
       {
-        "interval": 2861,
-        "timestamp": "2021-05-30 19:15:00",
-        "abs_dev_pct": 3.486022437074872,
-        "forecast": 1166.5779746885783,
-        "actual": 1127.280716,
-        "is_peak": true,
-        "penalty_impact": 235.7835521314696
+        "interval": 229,
+        "timestamp": "2021-05-03 09:15:00",
+        "abs_dev_pct": 3.4764978672122777,
+        "forecast": 1297.6812266949105,
+        "actual": 1254.083056,
+        "is_peak": false,
+        "penalty_impact": 261.5890241694633
+      },
+      {
+        "interval": 1957,
+        "timestamp": "2021-05-21 09:15:00",
+        "abs_dev_pct": 3.4384457377124735,
+        "forecast": 1241.411491825307,
+        "actual": 1200.145152,
+        "is_peak": false,
+        "penalty_impact": 247.59803895184132
       }
     ],
-    "peak_vol_financial_impact": 838.297849333456,
+    "worst_5_intervals": [
+      {
+        "interval": 2917,
+        "timestamp": "2021-05-31 09:15:00",
+        "abs_dev_pct": 3.607246366294493,
+        "forecast": 1320.1658954445415,
+        "actual": 1274.20228,
+        "is_peak": false,
+        "penalty_impact": 275.78169266724944
+      },
+      {
+        "interval": 2629,
+        "timestamp": "2021-05-28 09:15:00",
+        "abs_dev_pct": 3.547830002152206,
+        "forecast": 1320.7165204649577,
+        "actual": 1275.465184,
+        "is_peak": false,
+        "penalty_impact": 271.508018789747
+      },
+      {
+        "interval": 1958,
+        "timestamp": "2021-05-21 09:30:00",
+        "abs_dev_pct": 3.525104220231757,
+        "forecast": 1283.6174695994212,
+        "actual": 1239.909372,
+        "is_peak": false,
+        "penalty_impact": 262.2485855965265
+      },
+      {
+        "interval": 229,
+        "timestamp": "2021-05-03 09:15:00",
+        "abs_dev_pct": 3.4764978672122777,
+        "forecast": 1297.6812266949105,
+        "actual": 1254.083056,
+        "is_peak": false,
+        "penalty_impact": 261.5890241694633
+      },
+      {
+        "interval": 1957,
+        "timestamp": "2021-05-21 09:15:00",
+        "abs_dev_pct": 3.4384457377124735,
+        "forecast": 1241.411491825307,
+        "actual": 1200.145152,
+        "is_peak": false,
+        "penalty_impact": 247.59803895184132
+      }
+    ],
+    "peak_vol_financial_impact": 827.7935546886868,
+    "peak_volatility_financial_impact": 827.7935546886868,
     "reliability_violations": 0,
-    "mape_pct": 1.048375125434003,
-    "forecast_bias_pct": -0.08165286425259065
+    "mape_pct": 1.035660120295522,
+    "forecast_bias_pct": -0.1570957614393183
   }
 }

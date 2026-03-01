@@ -138,7 +138,7 @@ class MultiHorizonForecaster:
         self.peak_buffers: Dict[str, float] = {}
 
     def fit(self, df: pd.DataFrame, target: str = "LOAD",
-            test_frac: float = 0.15):
+            test_frac: float = 0.15, financial_cap: float = 50000.0):
         """
         Train a model for each horizon.
         Automatically gates features to prevent leakage.
@@ -219,7 +219,7 @@ class MultiHorizonForecaster:
             # Compute penalty summary using integrated ABT financial metrics rather than RMSE alone
             from penalty import compute_penalty_summary
             is_peak_val = df_h["target_is_peak"].iloc[split_idx:].values if "target_is_peak" in df_h.columns else np.zeros(len(y_val))
-            val_summary = compute_penalty_summary(pred, y_val.values, is_peak_val, regime="tiered")
+            val_summary = compute_penalty_summary(pred, y_val.values, is_peak_val, financial_cap, regime="tiered")
 
             self.metrics[name] = {
                 "financial_penalty": val_summary["total_penalty"],

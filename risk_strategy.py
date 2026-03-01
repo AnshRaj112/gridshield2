@@ -9,7 +9,7 @@ from typing import Dict
 from config import (
     PENALTY_UNDER_BASE, PENALTY_OVER_BASE, PENALTY_UNDER_STAGE2,
     PEAK_UNDER_MULTIPLIER, BIAS_LOWER_BOUND, BIAS_UPPER_BOUND,
-    FINANCIAL_CAP, MAX_RELIABILITY_VIOLATIONS, QUANTILES,
+    MAX_RELIABILITY_VIOLATIONS, QUANTILES,
     compute_quantile, PENALTY_UNDER_PEAK
 )
 
@@ -21,6 +21,7 @@ def compute_risk_strategy(
     mc_results: Dict,
     optimizer_results: Dict,
     backtest_results: Dict,
+    financial_cap: float,
     regime: str = "tiered",
 ) -> Dict:
     """
@@ -63,14 +64,23 @@ def compute_risk_strategy(
             "expected_penalty": mc_results.get("mean_penalty", 0),
             "var_95": mc_results.get("var_95", 0),
             "cvar_95": mc_results.get("cvar_95", 0),
+            
+            "linear_expected": mc_results.get("linear_mean", 0),
+            "linear_var_95": mc_results.get("linear_var_95", 0),
+            "linear_cvar_95": mc_results.get("linear_cvar_95", 0),
+            
+            "jump_expected": mc_results.get("jump_mean", 0),
+            "jump_var_95": mc_results.get("jump_var_95", 0),
+            "jump_cvar_95": mc_results.get("jump_cvar_95", 0),
+            
             "cap_breach_probability": mc_results.get("cap_breach_prob", 0),
-            "financial_cap": FINANCIAL_CAP,
-            "headroom": FINANCIAL_CAP - mc_results.get("var_95", 0),
+            "financial_cap": financial_cap,
+            "headroom": financial_cap - mc_results.get("var_95", 0),
             "minimum_required_cap": optimizer_results.get("minimum_required_cap", 0),
             "is_feasible": optimizer_results.get("is_feasible", True),
         },
         "constraint_satisfaction": {
-            "financial_cap_met": mc_results.get("mean_penalty", 0) < FINANCIAL_CAP,
+            "financial_cap_met": mc_results.get("mean_penalty", 0) < financial_cap,
             "reliability_met": (
                 mc_results.get("mean_violations", 0) <= MAX_RELIABILITY_VIOLATIONS
             ),
@@ -82,6 +92,19 @@ def compute_risk_strategy(
             "vs_naive_pct": backtest_results.get("penalty_reduction_vs_naive_pct", 0),
             "vs_rolling_pct": backtest_results.get("penalty_reduction_vs_rolling_pct", 0),
         },
+    }
+    
+    # ── Risk Normalization Layer ──
+    jump_mean = strategy["financial_exposure"]["jump_expected"]
+    linear_mean = strategy["financial_exposure"]["linear_expected"]
+    
+    c_ratio = (jump_mean / linear_mean) if linear_mean > 0 else 0
+    t_index = (strategy["financial_exposure"]["cvar_95"] / strategy["financial_exposure"]["expected_penalty"]) if strategy["financial_exposure"]["expected_penalty"] > 0 else 0
+    
+    strategy["tail_metrics"] = {
+        "convexity_amplification_ratio": c_ratio,
+        "tail_dominance_index": t_index,
+        "is_convex_regime_risk": t_index > 1.15
     }
 
     return strategy
@@ -120,6 +143,8 @@ def generate_strategy_report(strategy: Dict) -> str:
     report.append("3. FINANCIAL EXPOSURE MODELING")
     report.append("-" * 40)
     report.append(f"   Expected Penalty (Mean): ₹{fe['expected_penalty']:,.2f}")
+    report.append(f"    - Linear Base Comp:     ₹{fe['linear_expected']:,.2f}")
+    report.append(f"    - Tier Jump Comp:       ₹{fe['jump_expected']:,.2f}")
     report.append(f"   VaR (95%):               ₹{fe['var_95']:,.2f}")
     report.append(f"   CVaR (95%):              ₹{fe['cvar_95']:,.2f}")
     report.append(f"   Financial Cap:           ₹{fe['financial_cap']:,.2f}")

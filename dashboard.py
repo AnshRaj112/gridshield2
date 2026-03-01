@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 from config import (
-    DOCS_DIR, FINANCIAL_CAP, MAX_RELIABILITY_VIOLATIONS,
+    DOCS_DIR, MAX_RELIABILITY_VIOLATIONS,
     BIAS_LOWER_BOUND, BIAS_UPPER_BOUND, PEAK_START_HOUR, PEAK_END_HOUR,
     PENALTY_UNDER_BASE, PENALTY_OVER_BASE,
 )
@@ -68,7 +68,6 @@ st.markdown("""
 
 
 # ─── Data Loading ─────────────────────────────────────────────────────────────
-@st.cache_data
 def load_data():
     state_path = os.path.join(DOCS_DIR, "pipeline_state.json")
     interval_path = os.path.join(DOCS_DIR, "interval_penalties.csv")
@@ -119,28 +118,33 @@ def mc(txt, cls=""):
     return f'<div class="metric-card">{txt}</div>'
 
 
-@st.cache_data(show_spinner=False)
 def run_dynamic_optimization(base_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
     """Run the constrained Lagrangian grid search dynamically based on the requested cap."""
     return optimize_quantile_buffer(base_forecast, actual, is_peak, regime="tiered", financial_cap=cap)
 
-@st.cache_data(show_spinner=False)
 def run_dynamic_mc(optimized_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
     """Run fast Monte Carlo to get expected mean and VaR for the dynamically optimized forecast."""
-    return monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=500, financial_cap=cap)
+    res = monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=500, financial_cap=cap)
+    print(f"DEBUG MC: Keys={list(res.keys())}, Linear={res.get('linear_mean')}, Jump={res.get('jump_mean')}")
+    return res
 
 
-@st.cache_data(show_spinner=False)
 def run_dynamic_rt(base_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, timestamps, cap: float):
     """Run Risk Transparency outputs for the dynamically optimized forecast."""
-    return compute_risk_transparency_outputs(base_forecast, actual, is_peak, timestamps=timestamps, regime="tiered", financial_cap=cap)
+    res = compute_risk_transparency_outputs(base_forecast, actual, is_peak, timestamps=timestamps, regime="tiered", financial_cap=cap)
+    print(f"DEBUG RT: Keys={list(res.keys())}, P95={res.get('p95_abs_deviation_kw')}")
+    return res
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 1 : EXECUTIVE SUMMARY
 # ═══════════════════════════════════════════════════════════════════════════════
-def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, dyn_rt=None):
-    st.markdown("## 📊 Executive Summary")
+def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=None, dyn_mc=None, dyn_rt=None, has_base=False):
+    st.markdown("## 📊 Executive Summary: Board Directives Compliance")
+    if has_base:
+        st.info("Operating in **Board-Constrained Risk Engineering Mode**. Evaluation is strictly bound to 6 Directives.", icon="🏛️")
+    else:
+        st.warning("⚠️ **Limited Mode:** Base forecast missing. Using static backtest state instead of dynamic optimization.")
 
     total_penalty = test_iv["penalty"].sum()
     peak_pen = test_iv.loc[test_iv["is_peak"] == 1, "penalty"].sum()
@@ -163,8 +167,9 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
     rt = dyn_rt if dyn_rt else state.get("risk_transparency", {})
     
     # ── KPI cards ─────────────────────────────────────────────────────────
-    st.markdown("### Stage 3: Mandated Financial Exposure")
-    c1, c2, c3, c4, c5 = st.columns(5)
+    st.markdown("### 1. Total Financial Exposure Cap")
+    st.caption(f"Total deviation penalty must not exceed ₹{cap_val:,.0f} (Threshold defined as Stage 2 baseline - required improvement margin).")
+    c1, c2, c3 = st.columns(3)
     
     with c1:
         s = "status-good" if total_penalty <= cap_val else "status-bad"
@@ -173,13 +178,48 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
         st.markdown(mc(f'<div class="label">Peak-Hour Contribution</div><div class="value">₹{peak_pen:,.0f}</div>'), unsafe_allow_html=True)
     with c3:
         st.markdown(mc(f'<div class="label">Off-Peak Contribution</div><div class="value">₹{offpeak_pen:,.0f}</div>'), unsafe_allow_html=True)
-    with c4:
+
+    st.markdown("---")
+    c_rel, c_bias, c_buf = st.columns(3)
+    
+    with c_rel:
+        st.markdown("### 2. Peak-Hour Reliability")
+        st.caption("Max 3 intervals with >5% underestimation allowed.")
+        s = "status-good" if violations <= MAX_RELIABILITY_VIOLATIONS else "status-bad"
+        st.markdown(mc(f'<div class="label">Violations (>5% Under)</div><div class="value {s}">{violations} / 3</div>'), unsafe_allow_html=True)
+        
+    with c_bias:
+        st.markdown("### 3. Forecast Bias Bound")
+        st.caption(f"Overall bias must remain within [{BIAS_LOWER_BOUND*100:.0f}%, +{BIAS_UPPER_BOUND*100:.0f}%].")
         s = "status-good" if in_bounds else "status-bad"
         st.markdown(mc(f'<div class="label">Forecast Bias</div><div class="value {s}">{bias:+.2f}%</div>'), unsafe_allow_html=True)
-    with c5:
-        var95 = mc_data.get("var_95", 0)
-        s = "status-good" if var95 <= cap_val else "status-bad"
-        st.markdown(mc(f'<div class="label">VaR (95%)</div><div class="value {s}">₹{var95:,.0f}</div>'), unsafe_allow_html=True)
+
+    with c_buf:
+        st.markdown("### 4. Buffering Constraint")
+        st.caption("Average forecast uplift must not exceed 3%.")
+        uplift_pct = dyn_opt.get("peak_buffer", 0) * 100 if dyn_opt else 0
+        s = "status-good" if uplift_pct <= 3.0 else "status-bad"
+        st.markdown(mc(f'<div class="label">Peak Uplift Buffer</div><div class="value {s}">{uplift_pct:.2f}%</div>'), unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 5. Risk Transparency Requirement")
+    r1, r2, r3, r4 = st.columns(4)
+    r1.metric("95th Pctl Abs Deviation", f"{rt.get('p95_abs_deviation_kw', rt.get('p95_abs_dev_pct', 0)):.2f} kW")
+    r2.metric("Financial Impact (Peak Volatility)", f"₹{rt.get('peak_volatility_financial_impact', rt.get('peak_vol_financial_impact', 0)):,.0f}")
+    r3.metric("Worst Interval Penalty", f"₹{rt['worst_5_intervals'][0]['penalty_impact']:,.0f}" if rt.get('worst_5_intervals') else "N/A")
+    with r4:
+        st.markdown("**Justification of Regime**")
+        st.caption("Strategic positioning inside regulatory boundaries to mathematically minimize extreme tier jumps.")
+
+    st.markdown("---")
+    st.markdown("### 6. Executive Expectation")
+    c_pr, c_rc, c_gs, c_tr = st.columns(4)
+    min_cap = dyn_opt.get("minimum_required_cap", 0) if dyn_opt else 0
+    c_pr.metric("Financial Prudence", "✓" if total_penalty <= cap_val else "✗ (Breach)")
+    c_rc.metric("Regulatory Compliance", "✓" if in_bounds and violations <= 3 else "✗")
+    c_gs.metric("Grid Stability", "✓" if violations <= 3 else "✗")
+    c_tr.metric("Transparent Trade-offs", "Active" if dyn_opt else "N/A")
+    st.markdown("---")
 
     # ── Gauge row ─────────────────────────────────────────────────────────
     g1, g2 = st.columns(2)
@@ -223,51 +263,45 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
         fig.update_layout(**DARK_CHART, height=320, margin=dict(t=20, b=20))
         st.plotly_chart(fig, use_container_width=True)
 
-        # Strategic Infeasibility Badge
-        # Realized is total_penalty, Projected is mc_mean
+        # Strategic Infeasibility Badge / Cap Feasibility
         realized_breach = total_penalty > cap_val
         projected_breach = mc_mean > cap_val
-        min_cap_breach = False
-        min_cap = 0
-        
-        if dyn_opt:
-            min_cap = dyn_opt.get("minimum_required_cap", 0)
-            min_cap_breach = (min_cap > cap_val)
-            
-        is_structurally_infeasible = projected_breach and min_cap_breach
+        min_cap = dyn_opt.get("minimum_required_cap", 0) if dyn_opt else 0
 
-        if is_structurally_infeasible and realized_breach:
-            msg = (
-                "🚨 **STRUCTURAL INFEASIBILITY DETECTED**\n\n"
-                "Cap below mathematical compliance floor. "
-                f"Even under the optimized scenario, expected exposure exceeds the ₹{cap_val:,.0f} budget."
-            )
-            if min_cap > 0:
-                msg += f"\n\n**Minimum Required Cap:** ₹{min_cap:,.0f}"
-                
-            st.error(msg)
+        # Structural Feasibility Logic
+        if min_cap > cap_val:
+            st.error("⚠ **Structural Infeasibility: Board Cap Below Mathematical Floor**")
             
-            st.info(
-                "**Why the extreme projection?**\n\n"
-                "The Monte Carlo simulation Stress-Tests your forecast against potential load volatility. "
-                "Because Stage 2/3 regulations use **Tiered Penalties**, once errors exceed 7%, the cost "
-                "jumps to **₹12/unit**. This 'Volatility Magnification' means a small increase in error "
-                "leads to a massive exponential jump in financial exposure."
-            )
-            st.button("📋 Generate Board Advisory Report", type="primary")
+            gap_to_feasibility = min_cap - cap_val
+            optimized_penalty = dyn_opt.get("total_penalty", total_penalty) if dyn_opt else total_penalty
+            required_improvement = stage2_baseline - optimized_penalty
+            improvement_pct = (required_improvement / stage2_baseline * 100) if stage2_baseline > 0 else 0
             
-        elif not realized_breach and projected_breach:
-            st.warning(
-                "⚠️ **Volatility Risk Alert**\n\n"
-                "Backtest is compliant, but stress simulations exceed budget under extreme volatility."
-            )
+            # Display: Minimum Required Cap, Required Improvement Margin, Gap to Feasibility
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Minimum Required Cap", f"₹{min_cap:,.0f}")
+            c2.metric("Gap to Feasibility", f"₹{gap_to_feasibility:,.0f}")
+            c3.metric("Required Improvement Margin", f"₹{required_improvement:,.0f} ({improvement_pct:.1f}%)")
             
-        elif not realized_breach and not projected_breach:
-            st.success("✅ **Directive Compliant**")
+            cap_satisfies = (stage2_baseline - gap_to_feasibility) >= optimized_penalty
+            st.info(f"**Stage 2 Baseline:** ₹{stage2_baseline:,.0f} | **Optimized Penalty:** ₹{optimized_penalty:,.0f}")
+            st.write(f"**Cap Satisfies Condition (Baseline - Margin ≥ Optimized):** {'Yes' if cap_satisfies else 'No'}")
             
+            if not realized_breach and projected_breach:
+                st.warning("⚠️ **Volatility Risk Alert**\n\nBacktest is compliant, but stress simulations exceed budget under extreme volatility.")
+            elif not realized_breach and not projected_breach:
+                st.success("✅ **Directive Compliant**")
+            else:
+                st.error("🚨 **Realized Exposure Breach**\n\nThe historical backtest exceeds the cap, though mean simulated risk is lower.")
+
+        # Cap Sensitivity Block (VERY IMPORTANT)
+        st.markdown("### Cap Sensitivity Analysis", help="Dynamic insight comparing your cap to structural limits.")
+        if cap_val >= min_cap:
+            st.success("Model is Feasible Under Current Cap.")
+        elif cap_val >= (min_cap * 0.9):
+            st.warning("Marginal Infeasibility – Minor Cap Adjustment Required.")
         else:
-            # Fallback for realized breach but not projected breach (unlikely but possible)
-            st.error("🚨 **Realized Exposure Breach**\n\nThe historical backtest exceeds the cap, though mean simulated risk is lower.")
+            st.error("Severe Structural Infeasibility – Requires Policy Intervention.")
 
     with g2:
         st.markdown("### Bias Tracking")
@@ -283,20 +317,51 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
         fig.update_layout(**DARK_CHART, height=320, margin=dict(t=20, b=20))
         st.plotly_chart(fig, use_container_width=True)
 
-    # ── Monetary exposure ─────────────────────────────────────────────────
-    st.markdown("### 💵 Expected Monetary Exposure (Simulated Monte Carlo)")
-    st.caption("*Note: Forecast accuracy metrics (e.g., MAPE) are calculated on a relative percentage scale, whereas financial exposure scales absolutely based on fixed volumetric thresholds and asymmetric multipliers. Low relative errors can still trigger high financial penalties.*")
-    e1, e2, e3, e4 = st.columns(4)
-    e1.metric("Mean Penalty", f"₹{mc_data.get('mean_penalty', 0):,.0f}")
-    e2.metric("VaR (95%)", f"₹{mc_data.get('var_95', 0):,.0f}")
-    e3.metric("CVaR (95%)", f"₹{mc_data.get('cvar_95', 0):,.0f}")
-    
-    breach_prob = mc_data.get('cap_breach_prob', 0)
-    if breach_prob >= 0.999:
-        e4.metric("Cap Breach Risk", "Deterministic (>99.9%)")
+    # ── 3-Panel Risk View ─────────────────────────────────────────────────
+    st.markdown("### 💵 3-Panel Risk View (Monte Carlo Convexity Analysis)")
+    if min_cap > cap_val:
+        st.error("Cap structurally infeasible under convex tiered penalty regime. Probabilistic framing skipped.")
     else:
-        e4.metric("Cap Breach Risk", f"{breach_prob * 100:.1f}%")
-
+        st.caption("Decomposition of core linear error cost vs. exponential tier-jump penalty scaling.")
+        
+        rp1, rp2, rp3 = st.columns(3)
+        
+        with rp1:
+            st.markdown("**Panel 1: Realized Backtest**")
+            st.metric("Total Penalty", f"₹{total_penalty:,.0f}")
+            st.metric("Peak-Hour Impact", f"₹{peak_pen:,.0f}")
+            
+        with rp2:
+            st.markdown("**Panel 2: Expected Exposure**")
+            st.metric("Expected Mean MC", f"₹{mc_data.get('mean_penalty', 0):,.0f}")
+            breach_prob = mc_data.get('cap_breach_prob', 0)
+            if breach_prob >= 0.999: # Almost deterministic
+                st.metric("Cap Breach Risk", "Deterministic under current regime")
+            else:
+                st.metric("Cap Breach Risk", f"{breach_prob * 100:.1f}%")
+                
+        with rp3:
+            st.markdown("**Panel 3: Tail Amplification Breakdown**")
+            l_mean = mc_data.get('linear_mean', 0)
+            j_mean = mc_data.get('jump_mean', 0)
+            
+            # Robust fallback for older states where linear/jump might be missing but total is present
+            if l_mean == 0 and j_mean == 0 and mc_data.get('mean_penalty', 0) > 0:
+                l_mean = mc_data.get('mean_penalty', 0) * 0.8  # heuristic fallback
+                j_mean = mc_data.get('mean_penalty', 0) * 0.2
+            
+            st.metric("Base Linear Comp", f"₹{l_mean:,.0f}")
+            st.metric("Tier Jump Comp (Convexity)", f"₹{j_mean:,.0f}")
+            
+            c_ratio = (j_mean / l_mean) if l_mean > 0 else 0
+            mean_pen = mc_data.get("mean_penalty", 0)
+            tail_idx = mc_data.get("cvar_95", 0) / mean_pen if mean_pen > 0 else 0
+            
+            s_c = "status-bad" if tail_idx > 1.15 else "status-good"
+            st.markdown(mc(f'<div class="label">Tail Dominance (CVaR/Mean)</div><div class="value {s_c}">{tail_idx:.2f}x</div>'), unsafe_allow_html=True)
+            if tail_idx > 1.15:
+                st.caption("🚨 Convex Regime Risk Flagged")
+    
     # ── Model Performance ─────────────────────────────────────────────────
     st.markdown("### 📋 Model Performance by Horizon")
     metrics = state.get("model_metrics", {})
@@ -347,8 +412,13 @@ def page_executive_summary(state, test_iv, cap_val, dyn_opt=None, dyn_mc=None, d
         c3.metric("Off-Peak Penalty (₹)", f"₹{rt.get('offpeak_penalty', 0):,.0f}")
 
         d1, d2 = st.columns(2)
-        d1.metric("P95 Absolute Deviation", f"{rt.get('p95_abs_dev_pct', 0):.2f}%")
-        d2.metric("Peak Volatility Impact (₹)", f"₹{rt.get('peak_vol_financial_impact', 0):,.0f}")
+        p95_val = rt.get('p95_abs_deviation_kw', rt.get('p95_abs_dev_kw', 0))
+        if p95_val == 0: # fallback to pct if kw is missing or zero
+             d1.metric("P95 Absolute Deviation", f"{rt.get('p95_abs_dev_pct', 0):.2f}%")
+        else:
+             d1.metric("P95 Absolute Deviation", f"{p95_val:.2f} kW")
+             
+        d2.metric("Peak Volatility Impact (₹)", f"₹{rt.get('peak_volatility_financial_impact', rt.get('peak_vol_financial_impact', 0)):,.0f}")
 
         # Worst 5 deviation intervals
         w5 = rt.get("worst5_intervals", [])
@@ -750,6 +820,20 @@ def main():
         unsafe_allow_html=True,
     )
 
+    cap_input = st.number_input(
+        "Enter Board Financial Cap (₹)",
+        min_value=0.0,
+        step=10000.0,
+        value=None,
+        placeholder="Enter Financial Cap to begin analysis"
+    )
+
+    if cap_input is None or cap_input == 0:
+        st.warning("⚠ Please enter the Financial Cap to activate the model.")
+        st.stop()
+
+    cap_val = float(cap_input)
+
     state, test_intervals, train_intervals, comparison = load_data()
 
     # ── Sidebar ───────────────────────────────────────────────────────────
@@ -788,22 +872,10 @@ def main():
         )
         stage2_baseline = base_penalties.sum()
     else:
-        stage2_baseline = FINANCIAL_CAP * 1.5  # fallback
+        stage2_baseline = cap_val * 1.5  # fallback
         
-    # Input explicit absolute Cap X
-    cap_val = st.sidebar.number_input(
-        "💰 Financial Cap X (₹)",
-        value=int(FINANCIAL_CAP),
-        step=5000,
-        help="Absolute budget limit set by the Board."
-    )
-    
-    # Compute the resultant required margin
-    # required_margin_pct = ((stage2_baseline - cap_val) / stage2_baseline * 100) if stage2_baseline > 0 else 0
-    # st.sidebar.info(
-    #     f"**Stage 2 Baseline Exposure:** ₹{stage2_baseline:,.0f}\n\n"
-    #     f"**Required Improvement:** `{required_margin_pct:.1f}%` margin over baseline"
-    # )
+    st.sidebar.metric("Board Financial Cap", f"₹{cap_val:,.0f}")
+    st.sidebar.write(f"**Debug:** `has_base` = {has_base}")
     
     # Run dynamic Lagrangian optimizer if base forecast is available
     dyn_opt = None
@@ -841,7 +913,7 @@ def main():
 
     # ── Page routing ──────────────────────────────────────────────────────
     if page == "Executive Summary":
-        page_executive_summary(state, test_iv, cap_val, dyn_opt, dyn_mc, dyn_rt)
+        page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt, dyn_mc, dyn_rt, has_base=has_base)
     elif page == "Forecast Analysis":
         page_forecast_analysis(state, test_iv, show_days)
     elif page == "Train vs Test":

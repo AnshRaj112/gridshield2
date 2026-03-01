@@ -12,7 +12,7 @@ import pandas as pd
 
 from config import (
     DOCS_DIR, HORIZONS, DEFAULT_QUANTILE, QUANTILES, QUANTILE_OFFPEAK,
-    PENALTY_UNDER_BASE, PENALTY_OVER_BASE, FINANCIAL_CAP,
+    PENALTY_UNDER_BASE, PENALTY_OVER_BASE,
 )
 from utils import merge_all_data
 from features import engineer_all_features
@@ -27,7 +27,7 @@ from risk_engine import (
 from risk_strategy import compute_risk_strategy, generate_strategy_report
 
 
-def run_pipeline():
+def run_pipeline(financial_cap: float):
     """Execute the full GridShield pipeline."""
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8')
@@ -93,7 +93,7 @@ def run_pipeline():
         quantile=tau_star,
         horizons=active_horizons,
     )
-    forecaster.fit(train_df)
+    forecaster.fit(train_df, financial_cap=financial_cap)
 
     # Generate test predictions using t+1 model
     print("\n[2.2] Generating test predictions...")
@@ -123,7 +123,7 @@ def run_pipeline():
     all_backtest_results = {}
     for regime in regimes:
         print(f"\n  [{regime.upper()}]")
-        results = run_backtest(forecast, actual, is_peak, regime)
+        results = run_backtest(forecast, actual, is_peak, financial_cap, regime)
         all_backtest_results[regime] = results
         report = format_backtest_report(results)
         print(report)
@@ -140,7 +140,7 @@ def run_pipeline():
 
     print("\n[4.1] Finding optimal bias offset...")
     opt_result, all_opt = find_optimal_bias(
-        forecast, actual, is_peak, regime="tiered"
+        forecast, actual, is_peak, financial_cap, "tiered"
     )
     print(f"  Optimal bias: {opt_result['bias_offset']*100:.2f}%")
     print(f"  Optimized penalty: ₹{opt_result['total_penalty']:,.2f}")
@@ -148,7 +148,7 @@ def run_pipeline():
 
     print("\n[4.2] Peak/off-peak buffer optimization...")
     buffer_result = optimize_quantile_buffer(
-        forecast, actual, is_peak, regime="tiered"
+        forecast, actual, is_peak, financial_cap, "tiered"
     )
     if buffer_result.get("is_feasible"):
         print(f"  Configuration (Peak Buffer): {buffer_result['peak_buffer']*100:.2f}%")
@@ -162,10 +162,10 @@ def run_pipeline():
     else:
         print(f"  WARNING: {buffer_result.get('warning')}")
         print(f"  Calculated Minimum Required Cap: ₹{buffer_result.get('minimum_required_cap', 0):,.2f}")
-        print(f"  Note: Current cap (₹{FINANCIAL_CAP:,.0f}) structurally impossible under current parameters.")
+        print(f"  Note: Current cap (₹{financial_cap:,.0f}) structurally impossible under current parameters.")
 
     print("\n[4.3] Generating Pareto frontier...")
-    pareto, all_points = pareto_frontier(forecast, actual, is_peak)
+    pareto, all_points = pareto_frontier(forecast, actual, is_peak, financial_cap=financial_cap)
     print(f"  Pareto-optimal points: {len(pareto)}")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -182,7 +182,7 @@ def run_pipeline():
     optimized_forecast[~peak_mask_main] *= (1 + buffer_result["offpeak_buffer"])
 
     mc_results = monte_carlo_penalty_simulation(
-        optimized_forecast, actual, is_peak, regime="tiered", n_simulations=1000
+        optimized_forecast, actual, is_peak, financial_cap, "tiered", n_simulations=1000
     )
     print(f"\n  Mean Penalty:  ₹{mc_results['mean_penalty']:,.2f}")
     print(f"  VaR (95%):     ₹{mc_results['var_95']:,.2f} ({mc_results['var_95_cap_utilization_pct']:.1f}% Cap Util)")
@@ -200,13 +200,13 @@ def run_pipeline():
     ]
     scenario_results = []
     for s in scenarios:
-        res = scenario_simulation(optimized_forecast, actual, is_peak, **s)
+        res = scenario_simulation(optimized_forecast, actual, is_peak, financial_cap, **s)
         scenario_results.append(res)
         print(f"  {res['scenario_name']:35s} → ₹{res['total_penalty']:>12,.2f}")
 
     # Sensitivity analysis
     print("\n[5.3] Sensitivity analysis matrix...")
-    sensitivity_df = sensitivity_analysis(forecast, actual, is_peak)
+    sensitivity_df = sensitivity_analysis(forecast, actual, is_peak, financial_cap=financial_cap)
     print(f"  Matrix size: {sensitivity_df.shape}")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -219,6 +219,7 @@ def run_pipeline():
     strategy = compute_risk_strategy(
         optimized_forecast, actual, is_peak,
         mc_results, buffer_result, primary_backtest,
+        financial_cap=financial_cap,
     )
     strategy_report = generate_strategy_report(strategy)
     print(strategy_report)
@@ -234,7 +235,7 @@ def run_pipeline():
     generate_output_a(forecaster)
 
     # Save Output B: Backtest Metrics
-    generate_output_b(all_backtest_results)
+    generate_output_b(all_backtest_results, financial_cap)
 
     # Save Output C: Risk Strategy
     generate_output_c(strategy_report, mc_results, scenario_results, sensitivity_df)
@@ -264,8 +265,8 @@ def run_pipeline():
     train_interval_df.to_csv(os.path.join(DOCS_DIR, "train_interval_penalties.csv"), index=False)
 
     # Compute summary statistics for train vs test comparison
-    train_summary = compute_penalty_summary(train_forecast, train_actual, train_is_peak, "tiered")
-    test_summary = compute_penalty_summary(optimized_forecast, actual, is_peak, "tiered")
+    train_summary = compute_penalty_summary(train_forecast, train_actual, train_is_peak, financial_cap, "tiered")
+    test_summary = compute_penalty_summary(optimized_forecast, actual, is_peak, financial_cap, "tiered")
 
     dataset_comparison = {
         "train": {
@@ -319,7 +320,7 @@ def run_pipeline():
         "strategy": strategy,
         "pareto_points": all_points,
         "risk_transparency": compute_risk_transparency_outputs(
-            optimized_forecast, actual, is_peak, timestamps=timestamps, regime="tiered"
+            optimized_forecast, actual, is_peak, financial_cap, timestamps=timestamps, regime="tiered"
         ),
     }
 
@@ -463,7 +464,7 @@ def generate_output_a(forecaster: MultiHorizonForecaster):
     print("  ✓ Output A saved: output_a_forecast_model.md")
 
 
-def generate_output_b(all_backtest_results: dict):
+def generate_output_b(all_backtest_results: dict, financial_cap: float):
     """Generate Mandatory Output B: Historical Backtest Metrics."""
     lines = []
     lines.append("# GRIDSHIELD – HISTORICAL BACKTEST METRICS (OUTPUT B)")
@@ -487,7 +488,7 @@ def generate_output_b(all_backtest_results: dict):
         lines.append(f"| Structured Bias Offset | {m['forecast_bias_pct']:.2f}% |")
         lines.append(f"| 95th Pctl Grid Draw Deviation | {m['p95_abs_deviation_kw']:.2f} kW |")
         lines.append(f"| >5% Underestimation Violations | {m['reliability_violations']} |")
-        lines.append(f"| Financial Cap Exceedance (₹{FINANCIAL_CAP:,.0f}) | {'✓ Cap Maintained' if m['cap_compliant'] else '✗ Cap Breached'} |")
+        lines.append(f"| Financial Cap Exceedance (₹{financial_cap:,.0f}) | {'✓ Cap Maintained' if m['cap_compliant'] else '✗ Cap Breached'} |")
         lines.append(f"| Regulatory Bias Bounds [-2%, +3%] | {'✓ Strict Compliance' if m['bias_in_bounds'] else '✗ Out of Bounds'} |")
         lines.append(f"| Volumetric Error (MAPE) | {m['mape_pct']:.2f}% |")
         lines.append("")
@@ -572,4 +573,15 @@ if __name__ == "__main__":
         import dashboard
         dashboard.main()
     else:
-        run_pipeline()
+        if len(sys.argv) < 2:
+            print("Notice: Financial Cap not provided as argument. Defaulting to Rs 50,000 for local test run.")
+            print("Usage: python main.py <FINANCIAL_CAP>")
+            financial_cap_input = 50000.0
+        else:
+            try:
+                financial_cap_input = float(sys.argv[1])
+            except ValueError:
+                print("Error: Financial Cap must be a valid number.")
+                sys.exit(1)
+
+        run_pipeline(financial_cap_input)

@@ -9,13 +9,14 @@ from penalty import (
     compute_penalty_summary, compute_naive_penalty,
     compute_full_penalty, compute_deviation, compute_pct_deviation,
 )
-from config import FINANCIAL_CAP, INTERVALS_PER_DAY
+from config import INTERVALS_PER_DAY
 
 
 def run_backtest(
     forecast: np.ndarray,
     actual: np.ndarray,
     is_peak: np.ndarray,
+    financial_cap: float,
     regime: str = "tiered",
 ) -> Dict:
     """
@@ -23,16 +24,16 @@ def run_backtest(
     Computes all mandatory Output B metrics.
     """
     # Model metrics
-    model_summary = compute_penalty_summary(forecast, actual, is_peak, regime)
+    model_summary = compute_penalty_summary(forecast, actual, is_peak, financial_cap, regime)
 
     # Naive baseline: previous-day same-time
-    naive_summary = compute_naive_penalty(actual, is_peak, regime)
+    naive_summary = compute_naive_penalty(actual, is_peak, financial_cap, regime)
 
     # Rolling mean baseline
     rolling_forecast = pd.Series(actual).rolling(
         INTERVALS_PER_DAY, min_periods=1
     ).mean().shift(1).bfill().values
-    rolling_summary = compute_penalty_summary(rolling_forecast, actual, is_peak, regime)
+    rolling_summary = compute_penalty_summary(rolling_forecast, actual, is_peak, financial_cap, regime)
 
     # Penalty reduction vs baselines
     naive_reduction = (
