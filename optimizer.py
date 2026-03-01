@@ -103,22 +103,27 @@ def optimize_quantile_buffer(
     # Track the absolute minimum penalty achieved (ignoring constraints)
     min_achievable_penalty = float("inf")
 
-    for b_peak in np.linspace(0.08, -0.05, 30):
-        for b_offpeak in np.linspace(-0.03, 0.05, 30):
+    for b_peak in np.linspace(0.12, -0.05, 20):
+        for b_offpeak in np.linspace(-0.02, 0.08, 20):
             adjusted = base_forecast.copy()
             peak_mask = is_peak == 1
             adjusted[peak_mask] *= (1 + b_peak)
             adjusted[~peak_mask] *= (1 + b_offpeak)
 
             summary = compute_penalty_summary(adjusted, actual, is_peak, financial_cap, regime)
-            
-            # Fast Monte Carlo to evaluate VaR (fewer paths for speed during grid search)
-            fast_mc = monte_carlo_penalty_simulation(
-                adjusted, actual, is_peak, financial_cap, regime, n_simulations=100
-            )
-
             expected_penalty = summary["total_penalty"]
-            var_95 = fast_mc["var_95"]
+            
+            # Heuristic pruning: If expected penalty is already 25% over cap, skip expensive MC
+            if expected_penalty > financial_cap * 1.25:
+                var_95 = expected_penalty * 1.5 # dummy conservative estimate for pruning
+                fast_mc = {"var_95": var_95}
+            else:
+                # Fast Monte Carlo to evaluate VaR (fewer paths for speed during grid search)
+                fast_mc = monte_carlo_penalty_simulation(
+                    adjusted, actual, is_peak, financial_cap, regime, n_simulations=100
+                )
+                var_95 = fast_mc["var_95"]
+
             violations = summary["reliability_violations"]
             bias_val = summary["forecast_bias_pct"] / 100.0
             

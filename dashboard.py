@@ -127,7 +127,7 @@ def run_dynamic_optimization(base_forecast: np.ndarray, actual: np.ndarray, is_p
 @st.cache_data(show_spinner=False)
 def run_dynamic_mc(optimized_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
     """Run fast Monte Carlo to get expected mean and VaR for the dynamically optimized forecast."""
-    return monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=500, financial_cap=cap)
+    return monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=250, financial_cap=cap)
 
 
 @st.cache_data(show_spinner=False)
