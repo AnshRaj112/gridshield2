@@ -141,18 +141,9 @@ def compute_decomposed_penalty(forecast: np.ndarray, actual: np.ndarray,
     The linear_penalty is what the penalty WOULD be if the base linear rates were used.
     The tier_jump_penalty is the extra penalty incurred due to convex jumps.
     """
-    from config import TIERED_PENALTIES, PEAK_UNDER_MULTIPLIER
     deviation = compute_deviation(forecast, actual)
-    
-    # Base rate for decomposition is the FIRST TIER (lowest rate)
-    first_tier_rate = TIERED_PENALTIES[0][1]
-    linear_penalties = np.abs(deviation) * first_tier_rate
-    
-    # Apply peak multiplier if applicable to base decomposition too
-    peak_under = (deviation < 0) & (is_peak == 1)
-    linear_penalties[peak_under] *= PEAK_UNDER_MULTIPLIER
-    
-    base_penalty_sum = linear_penalties.sum()
+    # Base rates
+    linear_penalties = linear_penalty(deviation, is_peak)
     base_penalty_sum = linear_penalties.sum()
     
     # Actual selected regime

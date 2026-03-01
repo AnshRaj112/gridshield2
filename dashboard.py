@@ -68,6 +68,7 @@ st.markdown("""
 
 
 # ─── Data Loading ─────────────────────────────────────────────────────────────
+@st.cache_data
 def load_data():
     state_path = os.path.join(DOCS_DIR, "pipeline_state.json")
     interval_path = os.path.join(DOCS_DIR, "interval_penalties.csv")
@@ -118,33 +119,29 @@ def mc(txt, cls=""):
     return f'<div class="metric-card">{txt}</div>'
 
 
+@st.cache_data(show_spinner=False)
 def run_dynamic_optimization(base_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
     """Run the constrained Lagrangian grid search dynamically based on the requested cap."""
     return optimize_quantile_buffer(base_forecast, actual, is_peak, regime="tiered", financial_cap=cap)
 
+@st.cache_data(show_spinner=False)
 def run_dynamic_mc(optimized_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, cap: float):
     """Run fast Monte Carlo to get expected mean and VaR for the dynamically optimized forecast."""
-    res = monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=500, financial_cap=cap)
-    print(f"DEBUG MC: Keys={list(res.keys())}, Linear={res.get('linear_mean')}, Jump={res.get('jump_mean')}")
-    return res
+    return monte_carlo_penalty_simulation(optimized_forecast, actual, is_peak, regime="tiered", n_simulations=500, financial_cap=cap)
 
 
+@st.cache_data(show_spinner=False)
 def run_dynamic_rt(base_forecast: np.ndarray, actual: np.ndarray, is_peak: np.ndarray, timestamps, cap: float):
     """Run Risk Transparency outputs for the dynamically optimized forecast."""
-    res = compute_risk_transparency_outputs(base_forecast, actual, is_peak, timestamps=timestamps, regime="tiered", financial_cap=cap)
-    print(f"DEBUG RT: Keys={list(res.keys())}, P95={res.get('p95_abs_deviation_kw')}")
-    return res
+    return compute_risk_transparency_outputs(base_forecast, actual, is_peak, timestamps=timestamps, regime="tiered", financial_cap=cap)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 1 : EXECUTIVE SUMMARY
 # ═══════════════════════════════════════════════════════════════════════════════
-def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=None, dyn_mc=None, dyn_rt=None, has_base=False):
+def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=None, dyn_mc=None, dyn_rt=None):
     st.markdown("## 📊 Executive Summary: Board Directives Compliance")
-    if has_base:
-        st.info("Operating in **Board-Constrained Risk Engineering Mode**. Evaluation is strictly bound to 6 Directives.", icon="🏛️")
-    else:
-        st.warning("⚠️ **Limited Mode:** Base forecast missing. Using static backtest state instead of dynamic optimization.")
+    st.info("Operating in **Board-Constrained Risk Engineering Mode**. Evaluation is strictly bound to 6 Directives.", icon="🏛️")
 
     total_penalty = test_iv["penalty"].sum()
     peak_pen = test_iv.loc[test_iv["is_peak"] == 1, "penalty"].sum()
@@ -412,13 +409,8 @@ def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=Non
         c3.metric("Off-Peak Penalty (₹)", f"₹{rt.get('offpeak_penalty', 0):,.0f}")
 
         d1, d2 = st.columns(2)
-        p95_val = rt.get('p95_abs_deviation_kw', rt.get('p95_abs_dev_kw', 0))
-        if p95_val == 0: # fallback to pct if kw is missing or zero
-             d1.metric("P95 Absolute Deviation", f"{rt.get('p95_abs_dev_pct', 0):.2f}%")
-        else:
-             d1.metric("P95 Absolute Deviation", f"{p95_val:.2f} kW")
-             
-        d2.metric("Peak Volatility Impact (₹)", f"₹{rt.get('peak_volatility_financial_impact', rt.get('peak_vol_financial_impact', 0)):,.0f}")
+        d1.metric("P95 Absolute Deviation", f"{rt.get('p95_abs_dev_pct', 0):.2f}%")
+        d2.metric("Peak Volatility Impact (₹)", f"₹{rt.get('peak_vol_financial_impact', 0):,.0f}")
 
         # Worst 5 deviation intervals
         w5 = rt.get("worst5_intervals", [])
@@ -875,7 +867,6 @@ def main():
         stage2_baseline = cap_val * 1.5  # fallback
         
     st.sidebar.metric("Board Financial Cap", f"₹{cap_val:,.0f}")
-    st.sidebar.write(f"**Debug:** `has_base` = {has_base}")
     
     # Run dynamic Lagrangian optimizer if base forecast is available
     dyn_opt = None
@@ -913,7 +904,7 @@ def main():
 
     # ── Page routing ──────────────────────────────────────────────────────
     if page == "Executive Summary":
-        page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt, dyn_mc, dyn_rt, has_base=has_base)
+        page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt, dyn_mc, dyn_rt)
     elif page == "Forecast Analysis":
         page_forecast_analysis(state, test_iv, show_days)
     elif page == "Train vs Test":
