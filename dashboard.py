@@ -163,6 +163,36 @@ def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=Non
 
     rt = dyn_rt if dyn_rt else state.get("risk_transparency", {})
     
+    # ── Robust Metric Recovery (if state is missing keys) ──────────────────
+    if not rt.get('p95_abs_deviation_kw') or rt.get('p95_abs_deviation_kw') == 0:
+        dev_kw = np.abs(test_iv["forecast"] - test_iv["actual"])
+        rt['p95_abs_deviation_kw'] = float(np.percentile(dev_kw, 95))
+        
+    if not rt.get('peak_volatility_financial_impact') or rt.get('peak_volatility_financial_impact') == 0:
+        peak_iv = test_iv[test_iv["is_peak"] == 1]
+        if len(peak_iv) > 0:
+            p_act = peak_iv["actual"].replace(0, 1)
+            p_vol = float(np.std((peak_iv["forecast"] - peak_iv["actual"]) / p_act))
+            rt['peak_volatility_financial_impact'] = p_vol * total_penalty
+        else:
+            rt['peak_volatility_financial_impact'] = 0
+            
+    if not rt.get('worst_5_intervals'):
+        # Reconstruct worst 5 from test_iv
+        test_iv_sorted = test_iv.sort_values("penalty", ascending=False).head(5)
+        worst5 = []
+        for _, row in test_iv_sorted.iterrows():
+            worst5.append({
+                "timestamp": str(row["timestamp"]),
+                "penalty_impact": float(row["penalty"]),
+                "abs_dev_pct": float(np.abs((row["forecast"] - row["actual"]) / (row["actual"] if row["actual"] != 0 else 1)) * 100),
+                "forecast": float(row["forecast"]),
+                "actual": float(row["actual"]),
+                "is_peak": bool(row["is_peak"])
+            })
+        rt['worst_5_intervals'] = worst5
+        rt['worst5_intervals'] = worst5
+    
     # ── KPI cards ─────────────────────────────────────────────────────────
     st.markdown("### 1. Total Financial Exposure Cap")
     st.caption(f"Total deviation penalty must not exceed ₹{cap_val:,.0f} (Threshold defined as Stage 2 baseline - required improvement margin).")
@@ -194,7 +224,20 @@ def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=Non
     with c_buf:
         st.markdown("### 4. Buffering Constraint")
         st.caption("Average forecast uplift must not exceed 3%.")
-        uplift_pct = dyn_opt.get("peak_buffer", 0) * 100 if dyn_opt else 0
+        # Robust recovery for uplift_pct
+        uplift_pct = 0
+        if dyn_opt:
+            uplift_pct = dyn_opt.get("peak_buffer", 0) * 100
+        elif state.get("optimizer", {}).get("peak_buffer"):
+            uplift_pct = state["optimizer"]["peak_buffer"] * 100
+        elif "base_forecast" in test_iv.columns:
+            p_iv = test_iv[test_iv["is_peak"] == 1]
+            if len(p_iv) > 0:
+                avg_fc = p_iv["forecast"].mean()
+                avg_base = p_iv["base_forecast"].mean()
+                if avg_base > 0:
+                    uplift_pct = (avg_fc / avg_base - 1) * 100
+        
         s = "status-good" if uplift_pct <= 3.0 else "status-bad"
         st.markdown(mc(f'<div class="label">Peak Uplift Buffer</div><div class="value {s}">{uplift_pct:.2f}%</div>'), unsafe_allow_html=True)
 
@@ -342,17 +385,38 @@ def page_executive_summary(state, test_iv, cap_val, stage2_baseline, dyn_opt=Non
             l_mean = mc_data.get('linear_mean', 0)
             j_mean = mc_data.get('jump_mean', 0)
             
-            # Robust fallback for older states where linear/jump might be missing but total is present
-            if l_mean == 0 and j_mean == 0 and mc_data.get('mean_penalty', 0) > 0:
-                l_mean = mc_data.get('mean_penalty', 0) * 0.8  # heuristic fallback
-                j_mean = mc_data.get('mean_penalty', 0) * 0.2
+            # Robust fallback for older states where linear/jump might be missing
+            if l_mean == 0 and j_mean == 0:
+                # Use realized decomposition from the backtest as the baseline for the display
+                # Linear: Rs 6 (Peak), Rs 4 (Off-peak) for Underest. Rs 2 for Overest. 
+                # (Actually compute from test_iv)
+                dev = test_iv["actual"] - test_iv["forecast"]
+                is_p = test_iv["is_peak"] == 1
+                
+                # Under-forecasting: actual > forecast (dev > 0)
+                l_p = np.where(is_p & (dev > 0), dev * 6, 0)
+                l_p += np.where((~is_p) & (dev > 0), dev * 4, 0)
+                # Over-forecasting: forecast > actual (dev < 0)
+                l_p += np.where(dev < 0, np.abs(dev) * 2, 0)
+                
+                real_lin = float(np.sum(l_p))
+                real_tot = float(test_iv["penalty"].sum())
+                real_jmp = max(0, real_tot - real_lin)
+                
+                # Scale by projected mean if possible, else use realized
+                target_mean = mc_data.get('mean_penalty', real_tot)
+                scale = target_mean / real_tot if real_tot > 0 else 1
+                
+                l_mean = real_lin * scale
+                j_mean = real_jmp * scale
             
             st.metric("Base Linear Comp", f"₹{l_mean:,.0f}")
             st.metric("Tier Jump Comp (Convexity)", f"₹{j_mean:,.0f}")
             
             c_ratio = (j_mean / l_mean) if l_mean > 0 else 0
             mean_pen = mc_data.get("mean_penalty", 0)
-            tail_idx = mc_data.get("cvar_95", 0) / mean_pen if mean_pen > 0 else 0
+            if mean_pen == 0: mean_pen = total_penalty
+            tail_idx = mc_data.get("cvar_95", 0) / mean_pen if mean_pen > 0 else (total_penalty*1.05 / total_penalty if total_penalty > 0 else 1.05)
             
             s_c = "status-bad" if tail_idx > 1.15 else "status-good"
             st.markdown(mc(f'<div class="label">Tail Dominance (CVaR/Mean)</div><div class="value {s_c}">{tail_idx:.2f}x</div>'), unsafe_allow_html=True)
